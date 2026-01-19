@@ -73,4 +73,11 @@ public class AuthModels {
         @SerializedName("서비스URL")
         public String url;
     }
+    public static class VaccineResponse implements java.io.Serializable {
+        @SerializedName("name") public String name;
+        @SerializedName("degree") public int degree;
+        @SerializedName("dueDate") public String dueDate;
+        @SerializedName("dDay") public int dDay;
+        @SerializedName("description") public String description;
+    }
 }

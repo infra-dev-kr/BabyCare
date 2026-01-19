@@ -16,13 +16,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // [라우터 연결]
 const authRouter = require('./src/routes/authRoutes');
-const policyRouter = require('./src/routes/policyRoutes'); // 1. Policy 라우터 추가
+const policyRouter = require('./src/routes/policyRoutes'); 
+const vaccineRouter = require('./src/routes/vaccineRoutes'); // 3. 예방접종 라우터 추가
 
 // 기존 인증 라우터
 app.use('/auth', authRouter);
 
-// 2. 복지 정책 라우터 추가 (안드로이드에서 /api/policies 로 요청)
+// 복지 정책 라우터
 app.use('/api/policies', policyRouter);
+
+// 4. 예방접종 스케줄 라우터 추가 (안드로이드에서 /api/vaccines 로 요청)
+app.use('/api/vaccines', vaccineRouter);
 
 // 기본 접속 테스트
 app.get('/', (req, res) => {
@@ -36,7 +40,8 @@ connectDB()
             console.log(`---------------------------------------`);
             console.log(`🚀 서버가 http://localhost:${PORT} 에서 대기 중입니다.`);
             console.log(`🚀 데이터베이스 연결 성공`);
-            console.log(`🚀 정책 API: http://localhost:${PORT}/api/policies`); // 확인용 로그 추가
+            console.log(`🚀 정책 API: http://localhost:${PORT}/api/policies`);
+            console.log(`🚀 예방접종 API: http://localhost:${PORT}/api/vaccines/schedule/:userId`); // 확인용 로그 추가
             console.log(`---------------------------------------`);
         });
     })

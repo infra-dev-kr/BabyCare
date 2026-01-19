@@ -6,6 +6,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET; // 추가됨
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 public interface ApiService {
 
@@ -28,4 +29,7 @@ public interface ApiService {
 
     @GET("/api/policies")
     Call<List<AuthModels.PolicyResponse>> getPolicies();
+
+    @GET("/api/vaccines/schedule/{userId}")
+    Call<List<AuthModels.VaccineResponse>> getVaccineSchedule(@Path("userId") String userId);
 }
