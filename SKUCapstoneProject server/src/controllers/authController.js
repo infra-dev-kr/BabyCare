@@ -167,3 +167,42 @@ exports.refresh = (req, res) => {
     return res.status(401).json({ ok: false, message: "invalid refreshToken" });
   }
 };
+// 6. 비밀번호 재설정
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ ok: false, message: "missing fields" });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 이메일 인증이 완료된 상태인지 확인
+    const verified = await EmailVerify.findOne({
+      email: normalizedEmail,
+      verified: true,
+    });
+
+    if (!verified) {
+      return res.status(403).json({ ok: false, message: "email not verified" });
+    }
+
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return res.status(404).json({ ok: false, message: "user not found" });
+    }
+
+    // 새 비밀번호 암호화
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    user.passwordHash = passwordHash;
+    await user.save();
+
+    // 인증 기록 삭제 (같은 인증번호 재사용 방지)
+    await EmailVerify.deleteMany({ email: normalizedEmail });
+
+    return res.json({ ok: true, message: "password updated" });
+  } catch (e) {
+    console.error("reset-password error:", e);
+    return res.status(500).json({ ok: false, message: e.message });
+  }
+};

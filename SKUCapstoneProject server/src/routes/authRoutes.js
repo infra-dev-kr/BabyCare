@@ -18,4 +18,7 @@ router.post("/login", authCtrl.login);
 // 5. 토큰 갱신 (안드로이드와 일치: /auth/refresh)
 router.post("/refresh", authCtrl.refresh);
 
+// 6. 비밀번호 재설정
+router.post("/reset-password", authCtrl.resetPassword);
+
 module.exports = router;
