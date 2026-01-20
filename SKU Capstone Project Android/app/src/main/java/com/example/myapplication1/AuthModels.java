@@ -7,7 +7,9 @@ public class AuthModels {
     // 1. 이메일 인증번호 요청용 (email만 보냄)
     public static class VerifyRequest {
         String email;
-        public VerifyRequest(String email) { this.email = email; }
+        public VerifyRequest(String email) {
+            this.email = email;
+        }
     }
 
     // 2. 인증번호 코드 확인용 (email과 code 보냄)
@@ -27,7 +29,7 @@ public class AuthModels {
         String password;
         boolean consent;
 
-        // ✅ 추가: 아기 생년월일 ("YYYY-MM-DD" 권장)
+        // 아기 생년월일 ("YYYY-MM-DD")
         String babyBirth;
 
         public SignupRequest(String email, String username, String password, boolean consent, String babyBirth) {
@@ -49,7 +51,7 @@ public class AuthModels {
         }
     }
 
-    // 5. 서버로부터 받을 응답 (공통)
+    // 5. 서버 공통 응답
     public static class UserResponse {
         @SerializedName("ok") public boolean ok;
         @SerializedName("message") public String message;
@@ -58,26 +60,32 @@ public class AuthModels {
         @SerializedName("userId") public String userId;
     }
 
-    // -----------------------------------------------------------
     // 6. 복지 정책 데이터 응답용 모델
-    // -----------------------------------------------------------
     public static class PolicyResponse implements java.io.Serializable {
-        @SerializedName("서비스명")
-        public String title;
-        @SerializedName("서비스요약")
-        public String summary;
-        @SerializedName("소관부처명")
-        public String department;
-        @SerializedName("소관조직명")
-        public String subDepartment;
-        @SerializedName("서비스URL")
-        public String url;
+        @SerializedName("서비스명") public String title;
+        @SerializedName("서비스요약") public String summary;
+        @SerializedName("소관부처명") public String department;
+        @SerializedName("소관조직명") public String subDepartment;
+        @SerializedName("서비스URL") public String url;
     }
+
+    // 7. 백신 스케줄 응답용 모델
     public static class VaccineResponse implements java.io.Serializable {
         @SerializedName("name") public String name;
         @SerializedName("degree") public int degree;
         @SerializedName("dueDate") public String dueDate;
         @SerializedName("dDay") public int dDay;
         @SerializedName("description") public String description;
+    }
+
+    // 8. 비밀번호 재설정 요청용
+    public static class ResetPasswordRequest {
+        String email;
+        String newPassword;
+
+        public ResetPasswordRequest(String email, String newPassword) {
+            this.email = email;
+            this.newPassword = newPassword;
+        }
     }
 }

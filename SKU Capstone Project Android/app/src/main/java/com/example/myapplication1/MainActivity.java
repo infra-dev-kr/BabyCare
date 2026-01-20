@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,7 +29,10 @@ public class MainActivity extends AppCompatActivity {
         Button btnLogin = findViewById(R.id.btn_login);
         View btnSignup = findViewById(R.id.btn_signup);
 
-        // API 설정은 남겨두어도 무방합니다. (나중에 다시 쓸 수 있으니까요)
+        // 🔽 여기 추가: "아이디 또는 비밀번호를 잊으셨나요?" TextView
+        TextView tvFindAccount = findViewById(R.id.tv_find_account);
+
+        // API 설정 (지금은 안 써도 남겨둬도 됨)
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:3000/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -39,14 +43,13 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 서버 통신 없이 바로 화면 전환
+                // 서버 통신 없이 바로 화면 전환 (개발 모드)
                 Toast.makeText(MainActivity.this, "로그인 정보 확인 생략 (개발 모드)", Toast.LENGTH_SHORT).show();
 
-                // Intent를 사용하여 Menuactivity로 바로 이동
                 Intent intent = new Intent(MainActivity.this, Menuactivity.class);
                 startActivity(intent);
 
-                // 로그인 화면을 스택에서 제거 (뒤로가기 눌러도 로그인 화면 안 나오게)
+                // 로그인 화면 제거
                 finish();
             }
         });
@@ -56,6 +59,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(), TermsActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        // 🔽 여기 추가: 비밀번호 재설정 화면으로 이동
+        tvFindAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, ResetPasswordActivity.class);
                 startActivity(intent);
             }
         });
