@@ -25,4 +25,6 @@ router.post("/refresh", authCtrl.refresh);
 // 6. 비밀번호 재설정
 router.post("/reset-password", authCtrl.resetPassword);
 
+// 7. 개인정보 수정 (필드명: username, babyBirth 반영)
+router.put("/update-profile", authCtrl.updateProfile);
 module.exports = router;

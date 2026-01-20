@@ -7,6 +7,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface ApiService {
@@ -46,4 +47,7 @@ public interface ApiService {
 
     @GET("/api/vaccines/schedule/{userId}")
     Call<List<AuthModels.VaccineResponse>> getVaccineSchedule(@Path("userId") String userId);
+
+    @PUT("/auth/update-profile")
+    Call<AuthModels.UserResponse> updateProfile(@Body AuthModels.UpdateProfileRequest body);
 }

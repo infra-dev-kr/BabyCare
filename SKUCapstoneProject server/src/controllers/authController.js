@@ -300,3 +300,41 @@ exports.resetPassword = async (req, res) => {
     return res.status(500).json({ ok: false, message: e.message });
   }
 };
+
+
+// controllers/authController.js
+
+exports.updateProfile = async (req, res) => {
+    // 안드로이드에서 보낼 데이터: email(조회용), username, babyBirth
+    const { email, username, babyBirth } = req.body; 
+
+    try {
+        // 1. 유저를 찾아서 정보 업데이트
+        const updatedUser = await User.findOneAndUpdate(
+            { email: email }, // 이메일로 해당 유저를 찾음
+            { 
+                $set: { 
+                    username: username, 
+                    babyBirth: babyBirth 
+                } 
+            },
+            { new: true } // 업데이트된 후의 데이터를 반환받음
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ ok: false, message: "사용자를 찾을 수 없습니다." });
+        }
+
+        res.status(200).json({ 
+            ok: true, 
+            message: "개인정보가 성공적으로 수정되었습니다.",
+            user: {
+                username: updatedUser.username,
+                babyBirth: updatedUser.babyBirth
+            }
+        });
+    } catch (error) {
+        console.error("Update Error:", error);
+        res.status(500).json({ ok: false, message: "서버 오류 발생" });
+    }
+};

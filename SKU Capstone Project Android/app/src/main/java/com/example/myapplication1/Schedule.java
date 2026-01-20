@@ -47,7 +47,7 @@ public class Schedule extends AppCompatActivity {
 
         // 통신 설정 (IP 주소 확인 필요)
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3000")
+                .baseUrl("http://10.0.2.2:3001")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         ApiService apiService = retrofit.create(ApiService.class);

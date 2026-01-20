@@ -88,4 +88,16 @@ public class AuthModels {
             this.newPassword = newPassword;
         }
     }
+
+    public static class UpdateProfileRequest {
+        String email;     // 사용자 식별용 (변경 불가)
+        String username;  // 변경할 이름
+        String babyBirth; // 변경할 아기 생일 (yyyy-MM-dd)
+
+        public UpdateProfileRequest(String email, String username, String babyBirth) {
+            this.email = email;
+            this.username = username;
+            this.babyBirth = babyBirth;
+        }
+    }
 }
