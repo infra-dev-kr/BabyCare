@@ -1,7 +1,10 @@
 package com.example.myapplication1;
 
+import android.content.Intent; // 추가됨
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View; // 추가됨
+import android.widget.ImageButton; // 추가됨
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,6 +25,8 @@ public class GrapeActivity extends AppCompatActivity {
 
     private LineChart sleepChart;
     private TextView tvSleepScore, tvStatusMsg, tvCurrentTemp;
+    private TextView tvHumidity, tvNoise; // 추가: 습도와 소음 표시용
+    private ImageButton btnBack, btnGptReport; // 추가: GPT 리포트 버튼
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,29 +38,26 @@ public class GrapeActivity extends AppCompatActivity {
         tvSleepScore = findViewById(R.id.tv_sleep_score);
         tvStatusMsg = findViewById(R.id.tv_status_msg);
         tvCurrentTemp = findViewById(R.id.tv_current_temp);
+        tvHumidity = findViewById(R.id.tv_humidity); // XML에 추가 필요
+        tvNoise = findViewById(R.id.tv_noise);       // XML에 추가 필요
+        btnBack = findViewById(R.id.btn_back);
+        btnGptReport = findViewById(R.id.btn_gpt_report); // 추가
 
-        // 서버 데이터 로드
-        loadSleepData();
-    }
-
-    private void loadSleepData() {
-        ApiService apiService = RetrofitClient.getApiService();
-        apiService.getSleepData().enqueue(new Callback<List<AuthModels.SleepResponse>>() {
-            @Override
-            public void onResponse(Call<List<AuthModels.SleepResponse>> call, Response<List<AuthModels.SleepResponse>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    updateUI(response.body());
-                } else {
-                    tvStatusMsg.setText("데이터 분석 결과를 가져오지 못했습니다.");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<AuthModels.SleepResponse>> call, Throwable t) {
-                tvStatusMsg.setText("서버 연결 실패: " + t.getMessage());
-            }
+        // 뒤로가기 버튼
+        btnBack.setOnClickListener(v -> {
+            finish();
         });
+
+        // GPT 리포트 버튼 클릭 시 (새 액티비티나 다이얼로그로 연결)
+        btnGptReport.setOnClickListener(v -> {
+            // 여기에 GPT 리포트 API를 호출하는 로직을 넣을 예정입니다.
+            Intent intent = new Intent(GrapeActivity.this, GptReportActivity.class);
+            startActivity(intent);
+        });
+
     }
+
+    // ... loadSleepData() 로직은 동일 ...
 
     private void updateUI(List<AuthModels.SleepResponse> dataList) {
         if (dataList.isEmpty()) return;
@@ -66,34 +68,39 @@ public class GrapeActivity extends AppCompatActivity {
 
         for (int i = 0; i < dataList.size(); i++) {
             AuthModels.SleepResponse data = dataList.get(i);
-
-            // 서버에서 미리 계산된 점수 사용
             entries.add(new Entry(i, data.score));
             labels.add(data.time);
 
-            // 마지막 데이터로 상단 요약 정보 표시
             if (i == dataList.size() - 1) {
+                // 상단 요약 정보 업데이트
                 tvSleepScore.setText((int) data.score + "점");
                 tvCurrentTemp.setText(String.format("%.1f°C", data.temp));
-                tvStatusMsg.setText(data.status);
 
+                // 추가된 습도와 소음 데이터 표시
+                tvHumidity.setText(String.format("%.0f%%", data.humidity));
+                tvNoise.setText(String.format("%.0f dB", data.noise));
+
+                tvStatusMsg.setText(data.status);
                 isEmergencyDetected = data.isEmergency;
-                tvStatusMsg.setTextColor(isEmergencyDetected ? Color.RED : Color.parseColor("#666666"));
+                tvStatusMsg.setTextColor(isEmergencyDetected ? Color.RED : Color.parseColor("#1976D2"));
             }
         }
 
-        // 차트 그리기
+        configureChart(entries, labels, isEmergencyDetected);
+    }
+
+    private void configureChart(ArrayList<Entry> entries, ArrayList<String> labels, boolean isEmergency) {
         LineDataSet dataSet = new LineDataSet(entries, "수면 점수");
-        // 위급 상황이 포함되어 있다면 그래프 색상을 빨간색으로 변경
-        int themeColor = isEmergencyDetected ? Color.RED : Color.parseColor("#4A90E2");
+        int themeColor = isEmergency ? Color.RED : Color.parseColor("#4A90E2");
 
         dataSet.setColor(themeColor);
         dataSet.setCircleColor(themeColor);
         dataSet.setLineWidth(3f);
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
         dataSet.setDrawValues(false);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+
         sleepChart.setData(new LineData(dataSet));
         sleepChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
-        sleepChart.invalidate(); // 차트 새로고침
+        sleepChart.invalidate();
     }
 }

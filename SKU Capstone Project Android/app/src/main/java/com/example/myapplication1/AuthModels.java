@@ -105,6 +105,11 @@ public class AuthModels {
     public static class SleepResponse implements java.io.Serializable {
         @SerializedName("time") public String time;
         @SerializedName("temp") public float temp;
+
+        // 추가 권장 필드
+        @SerializedName("humidity") public float humidity; // 습도
+        @SerializedName("noise") public float noise;       // 소음
+
         @SerializedName("score") public float score;
         @SerializedName("status") public String status;
         @SerializedName("isEmergency") public boolean isEmergency;
