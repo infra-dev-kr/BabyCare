@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             app:cardCornerRadius="24dp"
-            app:cardElevation="2dp"
+            app:cardElevation="4dp"
             app:layout_constraintTop_toBottomOf="@id/tvHeader"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -57,13 +57,25 @@
                 android:padding="8dp" />
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/tvNotificationStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="🔔 푸시 알림 서비스 활성화 중"
+            android:textColor="#4F52FF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/cardCalendar"
+            app:layout_constraintStart_toStartOf="parent" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvVaccineSchedule"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:nestedScrollingEnabled="false"
-            app:layout_constraintTop_toBottomOf="@id/cardCalendar"
+            app:layout_constraintTop_toBottomOf="@id/tvNotificationStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@android:layout/simple_list_item_2" />
@@ -97,13 +109,13 @@
                     <ImageView
                         android:layout_width="28dp"
                         android:layout_height="28dp"
-                        android:src="@drawable/syringe" />
+                        android:src="@android:drawable/ic_menu_info_details" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
-                        android:text="백신별 예외 규칙 안내"
+                        android:text="스케줄링 알고리즘 안내"
                         android:textColor="#1F2246"
                         android:textSize="17sp"
                         android:textStyle="bold" />
@@ -124,7 +136,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="✓ 질병관리청 표준 일정표 기반"
+                            android:text="✓ 보건복지부 공공데이터(API) 실시간 연동"
                             android:textColor="#5E6BB2"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -132,7 +144,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="✓ 권장일(recommendedDate) 기준 표시"
+                            android:text="✓ 인플루엔자 등 계절성 백신 자동 보정 알고리즘"
                             android:textColor="#5E6BB2"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -140,7 +152,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:text="✓ 의료행위 판단이 아님을 명시함"
+                            android:text="✓ 개인별 접종 이력 기반 D-Day 자동 계산"
                             android:textColor="#5E6BB2"
                             android:textSize="13sp"
                             android:textStyle="bold" />
@@ -152,9 +164,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:padding="16dp"
+                    android:padding="8dp"
                     android:lineSpacingExtra="5dp"
-                    android:text=""
+                    android:text="현재 보건복지부 가이드라인에 따라 아이의 생년월일 기준 최적의 접종일을 계산하고 있습니다."
                     android:textColor="#1F2246"
                     android:textSize="14sp" />
             </LinearLayout>
