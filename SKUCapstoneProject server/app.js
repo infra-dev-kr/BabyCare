@@ -19,8 +19,10 @@ const authRouter = require('./src/routes/authRoutes');
 const policyRouter = require('./src/routes/policyRoutes'); 
 const vaccineRouter = require('./src/routes/vaccineRoutes'); 
 const sleepRoutes = require('./src/routes/sleepRoutes'); 
-// 🚀 1. SmartThings 라우터 가져오기
 const smartThingsRouter = require('./src/routes/smartThingsRoutes'); 
+
+// 🤖 AI 리포트 추가: 1. 라우터 파일 가져오기
+const aiRouter = require('./src/routes/airouter'); 
 
 // 기존 인증 라우터
 app.use('/auth', authRouter);
@@ -34,9 +36,12 @@ app.use('/api/vaccines', vaccineRouter);
 // 애기 수면 점수 
 app.use('/api/Sleep', sleepRoutes);
 
-// 🚀 2. SmartThings 라우터 등록 (큰 길 지정)
-// 이렇게 하면 안드로이드에서 /api/smartthings/register 로 요청을 보낼 수 있습니다.
+// SmartThings 라우터 등록
 app.use('/api/SmartThings', smartThingsRouter);
+
+// 🤖 AI 리포트 추가: 2. AI 라우터 등록 (큰 길 지정)
+// 이제 안드로이드에서 /api/ai/generate 로 요청을 보낼 수 있습니다.
+app.use('/api/ai', aiRouter);
 
 
 // 기본 접속 테스트
@@ -53,8 +58,10 @@ connectDB()
             console.log(`🚀 데이터베이스 연결 성공`);
             console.log(`🚀 정책 API: http://localhost:${PORT}/api/policies`);
             console.log(`🚀 예방접종 API: http://localhost:${PORT}/api/vaccines/schedule/:userId`);
-            // 🚀 3. 확인용 로그 추가
             console.log(`🚀 SmartThings API: http://localhost:${PORT}/api/smartthings/register`);
+            
+            // 🤖 AI 리포트 추가: 3. 확인용 로그 추가
+            console.log(`🚀 AI 리포트 API: http://localhost:${PORT}/api/ai/generate`);
             console.log(`---------------------------------------`);
         });
     })
