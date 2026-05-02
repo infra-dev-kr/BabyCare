@@ -1,4 +1,3 @@
-# [수정] 폴더 구조에 맞춘 상대 경로 임포트
 from ..engines.audio_engine import AudioEngine
 from ..utils import validate_audio, wrap_node_response, log_debug
 
@@ -23,14 +22,14 @@ def process_audio(data):
         log_debug("AUDIO_SERVICE", f"Processing for device: {device_id}")
 
         # =========================
-        # 2. engine 호출 (프레임 추가 및 분석)
+        # 2. engine 호출
         # =========================
-        # [수정] 기존 process() 대신 엔진의 메서드들을 순차적으로 호출합니다.
-        engine.add_audio_frame(audio)
-        result = engine.analyze()
+        # 넘파이 배열을 넘겨 모델 돌리기
+        result = engine.analyze(audio)
 
         # =========================
         # 3. 분석 결과 없음 처리 (버퍼링 중 등)
+        # >> 노이즈 발생 시 node에서 96000개의 배열을 넘겨 주기 때문에 버퍼링은 없을 것
         # =========================
         if result is None or result.get("msg") == "Buffering...":
             return wrap_node_response(
@@ -43,7 +42,7 @@ def process_audio(data):
             )
 
         # =========================
-        # 4. 아기 울음 감지 로직 (기존 speech/emotion 대신 적용)
+        # 4. 아기 울음 감지 로직
         # =========================
         cry_detected = result.get("cry_detected", False)
         cry_ratio = result.get("cry_ratio", 0.0)
@@ -69,9 +68,7 @@ def process_audio(data):
                 "device_id": device_id,
                 "cry_detected": True,
                 "cry_ratio": cry_ratio,
-                "cry_events": result.get("cry_events", []),
-                "noise_events": result.get("noise_events", []),
-                "status": "emergency" # 아기가 울고 있으니 emergency 상태로 전송
+                "status": "emergency"
             }
         )
 
