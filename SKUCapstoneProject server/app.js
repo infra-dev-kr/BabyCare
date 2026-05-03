@@ -4,10 +4,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const dgram = require('dgram');
 const axios = require('axios');
-<<<<<<< HEAD
-=======
-const path = require('path')
->>>>>>> kgj
+const path = require('path');
 
 // DB 연결
 const { connectDB } = require('./src/db');
@@ -47,13 +44,8 @@ const vaccineRouter = require('./src/routes/vaccineRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
 const smartThingsRouter = require('./src/routes/smartThingsRoutes');
 const videoRoutes = require('./src/routes/videoRoutes');
-<<<<<<< HEAD
-const soundAnalysisRoutes = require('./src/routes/soundAnalysisRoutes');
-const aiRouter = require('./src/routes/airouter');
-=======
 const soundAnalysisRoutes = require('./src/routes/Soundanalysisroutes');
 const aiRouter = require('./src/routes/airouter'); 
->>>>>>> kgj
 
 app.use('/auth', authRouter);
 app.use('/api/policies', policyRouter);
@@ -101,62 +93,20 @@ app.get('/api/test-ai-bridge', async (req, res) => {
 });
 
 // ==========================================
-<<<<<<< HEAD
-// 📡 UDP 영상 수신 및 실시간 전송
-// ==========================================
-const udpServer = dgram.createSocket('udp4');
-
-udpServer.on('message', (msg) => {
-    const base64Frame = msg.toString('base64');
-    const payload = JSON.stringify({
-        type: 'udp_frame',
-        timestamp: Date.now(),
-        data: base64Frame,
-        size: msg.length
-    });
-
-    wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(payload);
-        }
-    });
-});
-
-udpServer.bind(8888, () => {
-    console.log('📡 IoT UDP 수신 대기 중 (8888)');
-});
-
-// ==========================================
-// 기본 라우트
-// ==========================================
-app.get('/', (req, res) => {
-    res.send('🚀 Capstone AI Server Running');
-});
-
-// ==========================================
-// 서버 실행
-// ==========================================
-connectDB()
-    .then(() => {
-=======
 // 서버 실행
 // ==========================================
 app.get('/', (req, res) => res.send('🚀 Capstone AI Server Running'));
 
-// connectDB()
-//     .then(() => {
->>>>>>> kgj
-        server.listen(PORT, () => {
-            console.log('==============================================');
-            console.log(`✅ MongoDB 연결 성공`);
-            receiver.init(wss)
-            axios.post(`http://localhost:${PORT}/api/video/start`)
-            axios.post(`http://localhost:${PORT}/api/sound-analysis/start`)
-            console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
-            console.log(`🧪 테스트 주소: http://localhost:${PORT}/api/test-ai-bridge`);
-            console.log('==============================================');
-        });
-    // })
-    // .catch((err) => {
-    //     console.error("❌ 서버 시작 실패:", err.message);
-    // });
+server.listen(PORT, () => {
+    console.log('==============================================');
+    console.log(`✅ 서버 실행 성공`);
+    receiver.init(wss)
+    
+    // 자동 시작 트리거
+    axios.post(`http://localhost:${PORT}/api/video/start`).catch(() => {});
+    axios.post(`http://localhost:${PORT}/api/sound-analysis/start`).catch(() => {});
+    
+    console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
+    console.log(`🧪 테스트 주소: http://localhost:${PORT}/api/test-ai-bridge`);
+    console.log('==============================================');
+});
