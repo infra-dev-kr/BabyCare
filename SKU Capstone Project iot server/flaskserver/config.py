@@ -17,7 +17,7 @@ LOG_DIR.mkdir(exist_ok=True)
 # MODEL PATHS
 # ====================
 FACE_LANDMARKER_MODEL = MODELS_DIR / "face_landmarker.task"
-BABY_CRY_MODEL = MODELS_DIR / "baby_cry_model_v3"
+BABY_CRY_MODEL = MODELS_DIR / "baby_cry_onnx"
 YOLO_MODEL = (MODELS_DIR / "best.pt").resolve()
 
 # ====================
@@ -54,9 +54,9 @@ REQUEST_TIMEOUT_SEC = 60
 # ====================
 # AUDIO SETTINGS
 # ====================
-TARGET_SR = 48000
+TARGET_SR = 96000
 WINDOW_SIZE = 16000
-HOP_SIZE = 3200
+HOP_SIZE = 8000
 THRESHOLD = 0.6
 
 # ====================

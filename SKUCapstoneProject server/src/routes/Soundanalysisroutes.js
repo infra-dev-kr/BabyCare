@@ -8,12 +8,19 @@ const router = express.Router();
 const soundAnalysisController = require('../controllers/soundAnalysisController');
 
 /**
- * POST /api/sound-analysis/analyze
- * 단일 오디오 파일 울음 분석
- * Body: { audioPath: string, audioBase64: string, timestamp: number }
+ * POST /api/sound-analysis/start
+ * 음성 분석 시작
  */
-router.post('/analyze', (req, res) => {
-  soundAnalysisController.analyzeSound(req, res);
+router.post('/start', (req, res) => {
+  soundAnalysisController.startAudioAnalysis(req, res);
+});
+
+/**
+ * POST /api/sound-analysis/stop
+ * 음성 분석 중지
+ */
+router.post('/stop', (req, res) => {
+  soundAnalysisController.stopAudioAnalysis(req, res);
 });
 
 /**
@@ -27,25 +34,14 @@ router.get('/results', (req, res) => {
 /**
  * GET /api/sound-analysis/history
  * 분석 히스토리 조회
- * Query: ?limit=20
  */
 router.get('/history', (req, res) => {
   soundAnalysisController.getAnalysisHistory(req, res);
 });
 
 /**
- * POST /api/sound-analysis/batch
- * 배치 울음 분석 (여러 오디오 파일)
- * Body: { audioFiles: [{ audioPath: string, timestamp: number }, ...] }
- */
-router.post('/batch', (req, res) => {
-  soundAnalysisController.analyzeBatch(req, res);
-});
-
-/**
  * GET /api/sound-analysis/results/:date
  * 특정 날짜의 분석 결과 조회
- * Params: date (YYYY-MM-DD 형식)
  */
 router.get('/results/:date', (req, res) => {
   soundAnalysisController.getResultsByDate(req, res);

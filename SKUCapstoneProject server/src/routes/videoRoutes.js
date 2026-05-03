@@ -9,18 +9,18 @@ const videoController = require('../controllers/videoController');
 
 /**
  * POST /api/video/start
- * IoT 카메라 스트림 시작
+ * 비디오 분석 시작
  */
 router.post('/start', (req, res) => {
-  videoController.startIOTStream(req, res);
+  videoController.startAnalysis(req, res);
 });
 
 /**
  * POST /api/video/stop
- * IoT 카메라 스트림 중지
+ * 비디오 분석 중지
  */
 router.post('/stop', (req, res) => {
-  videoController.stopIOTStream(req, res);
+  videoController.stopAnalysis(req, res);
 });
 
 /**

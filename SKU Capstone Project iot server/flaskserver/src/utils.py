@@ -15,37 +15,6 @@ def fmt(t):
 
 
 # ======================================================
-# AUDIO dB CALCULATION
-# ======================================================
-def calculate_db(audio_samples):
-    """
-    safe dB calculation
-    """
-
-    try:
-        if audio_samples is None or len(audio_samples) == 0:
-            return -100.0
-
-        audio_samples = np.asarray(audio_samples, dtype=np.float32)
-
-        # stereo → mono
-        if audio_samples.ndim == 2:
-            audio_samples = np.mean(audio_samples, axis=0)
-
-        rms = np.sqrt(np.mean(audio_samples ** 2))
-
-        if not np.isfinite(rms) or rms < 1e-10:
-            return -100.0
-
-        db = 20 * math.log10(rms)
-
-        return float(db)
-
-    except:
-        return -100.0
-
-
-# ======================================================
 # HEAD POSE (YAW)
 # ======================================================
 def get_yaw_from_matrix(matrix):

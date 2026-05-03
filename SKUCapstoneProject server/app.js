@@ -4,6 +4,10 @@ const http = require('http');
 const WebSocket = require('ws');
 const dgram = require('dgram');
 const axios = require('axios');
+<<<<<<< HEAD
+=======
+const path = require('path')
+>>>>>>> kgj
 
 // DB 연결
 const { connectDB } = require('./src/db');
@@ -18,6 +22,9 @@ const PORT = process.env.PORT || 3001;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+//receiver.js => rpi와 연결
+const receiver = require('./src/receiver')
 
 // ==========================================
 // ✅ 요청 로그 확인용 코드
@@ -40,8 +47,13 @@ const vaccineRouter = require('./src/routes/vaccineRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
 const smartThingsRouter = require('./src/routes/smartThingsRoutes');
 const videoRoutes = require('./src/routes/videoRoutes');
+<<<<<<< HEAD
 const soundAnalysisRoutes = require('./src/routes/soundAnalysisRoutes');
 const aiRouter = require('./src/routes/airouter');
+=======
+const soundAnalysisRoutes = require('./src/routes/Soundanalysisroutes');
+const aiRouter = require('./src/routes/airouter'); 
+>>>>>>> kgj
 
 app.use('/auth', authRouter);
 app.use('/api/policies', policyRouter);
@@ -51,6 +63,9 @@ app.use('/api/SmartThings', smartThingsRouter);
 app.use('/api/video', videoRoutes);
 app.use('/api/sound-analysis', soundAnalysisRoutes);
 app.use('/api/ai', aiRouter);
+
+// HLS 스트리밍 파일 서빙
+app.use('/stream', express.static(path.join(__dirname, 'public/stream')))
 
 // ==========================================
 // 🧪 Flask 서버 통신 테스트 라우트
@@ -86,6 +101,7 @@ app.get('/api/test-ai-bridge', async (req, res) => {
 });
 
 // ==========================================
+<<<<<<< HEAD
 // 📡 UDP 영상 수신 및 실시간 전송
 // ==========================================
 const udpServer = dgram.createSocket('udp4');
@@ -122,14 +138,25 @@ app.get('/', (req, res) => {
 // ==========================================
 connectDB()
     .then(() => {
+=======
+// 서버 실행
+// ==========================================
+app.get('/', (req, res) => res.send('🚀 Capstone AI Server Running'));
+
+// connectDB()
+//     .then(() => {
+>>>>>>> kgj
         server.listen(PORT, () => {
             console.log('==============================================');
             console.log(`✅ MongoDB 연결 성공`);
+            receiver.init(wss)
+            axios.post(`http://localhost:${PORT}/api/video/start`)
+            axios.post(`http://localhost:${PORT}/api/sound-analysis/start`)
             console.log(`🚀 서버 실행 중: http://localhost:${PORT}`);
             console.log(`🧪 테스트 주소: http://localhost:${PORT}/api/test-ai-bridge`);
             console.log('==============================================');
         });
-    })
-    .catch((err) => {
-        console.error("❌ 서버 시작 실패:", err.message);
-    });
+    // })
+    // .catch((err) => {
+    //     console.error("❌ 서버 시작 실패:", err.message);
+    // });
