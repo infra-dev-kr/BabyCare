@@ -1,5 +1,6 @@
 const { MLR } = require('ml-regression');
 const Sleep = require('../models/Sleep');
+const aiModel = require('../models/ai');
 
 let sleepModel = null;
 
@@ -114,9 +115,10 @@ exports.getSleepAnalysis = async (req, res) => {
     }
 };
 
-// [Step 5] GPT 리포트용 데이터
+// [Step 5] GPT 리포트 직접 생성 (ai.js 모듈 호출)
 exports.getReportPayload = async (req, res) => {
     try {
+        // 1. 최근 24시간 데이터 가져오기
         const last24h = await Sleep.find({
             createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
         });
@@ -125,19 +127,54 @@ exports.getReportPayload = async (req, res) => {
             return res.status(404).json({ message: '분석할 데이터가 없습니다.' });
         }
 
-        const avgTemp     = (last24h.reduce((a, b) => a + b.temp, 0) / last24h.length).toFixed(1);
-        const avgHumidity = (last24h.reduce((a, b) => a + b.humidity, 0) / last24h.length).toFixed(1);
-        const maxNoise    = Math.max(...last24h.map(d => d.noise));
-        const cryCount    = last24h.filter(d => d.isCrying === 1).length;
-        const avgScore    = (last24h.reduce((a, b) => a + b.actualScore, 0) / last24h.length).toFixed(1);
+        // 2. AI에게 전달할 데이터 양식으로 가공하기 (배열에서 통계 추출)
+        const temps = last24h.map(d => d.temp);
+        const humidities = last24h.map(d => d.humidity);
+        const noises = last24h.map(d => d.noise);
+        const scores = last24h.map(d => d.actualScore);
 
-        res.json({
-            prompt: `소아과 전문가 관점에서 아기의 수면 환경 리포트를 작성해 주세요.
-분석 데이터: 평균 온도 ${avgTemp}도, 평균 습도 ${avgHumidity}%, 최대 소음 ${maxNoise}dB, 울음 감지 ${cryCount}회, 평균 수면 점수 ${avgScore}점.
-환경 개선점과 수면 질에 대한 종합 의견을 주되, 전문적이면서 친절한 말투로 작성해 주세요.`,
-            data: { avgTemp, avgHumidity, maxNoise, cryCount, avgScore }
+        // 수면 상태 횟수 카운트
+        const comfortable = scores.filter(s => s > 80).length;
+        const normal = scores.filter(s => s > 60 && s <= 80).length;
+        const caution = scores.filter(s => s <= 60).length;
+
+        // 조도 데이터는 스키마에 없으므로 기본값 0 할당
+        const reportData = {
+            reportType: "일간 수면 환경 리포트",
+            periodStart: new Date(Date.now() - 24 * 60 * 60 * 1000).toLocaleString('ko-KR'),
+            periodEnd: new Date().toLocaleString('ko-KR'),
+            environment: {
+                avgTemp: (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1),
+                minTemp: Math.min(...temps).toFixed(1),
+                maxTemp: Math.max(...temps).toFixed(1),
+                avgHumidity: (humidities.reduce((a, b) => a + b, 0) / humidities.length).toFixed(1),
+                minHumidity: Math.min(...humidities).toFixed(1),
+                maxHumidity: Math.max(...humidities).toFixed(1),
+                avgNoise: (noises.reduce((a, b) => a + b, 0) / noises.length).toFixed(1),
+                maxNoise: Math.max(...noises).toFixed(1),
+                avgLight: 0 
+            },
+            sleep: {
+                avgSleepScore: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1),
+                bestSleepScore: Math.max(...scores),
+                worstSleepScore: Math.min(...scores),
+                statusSummary: { comfortable, normal, caution },
+                avgSleepDuration: 24 // 임시값: 현재 데이터상 정확한 수면 지속 시간 판별 로직은 없으므로
+            }
+        };
+
+        // 3. 만들어둔 ai.js의 함수를 호출하여 리포트 생성
+        const reportContent = await aiModel.generateAiReport(reportData);
+
+        // 4. 안드로이드 클라이언트로 최종 리포트 결과 전송
+        res.status(200).json({
+            success: true,
+            message: "AI 리포트가 성공적으로 생성되었습니다.",
+            report: reportContent 
         });
+
     } catch (err) {
+        console.error("AI 리포트 생성 에러:", err);
         res.status(500).json({ error: err.message });
     }
 };

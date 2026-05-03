@@ -47,7 +47,7 @@ exports.registerSmartThings = async (req, res) => {
         patToken: token,
         deviceCount: devices.length,
         updatedAt: Date.now()
-      },
+      }, 
       {
         upsert: true,
         new: true,

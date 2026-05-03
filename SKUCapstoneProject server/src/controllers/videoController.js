@@ -3,7 +3,7 @@
  * 기능: 
  * 1. IoT 카메라 영상 수신 (onFrame)
  * 2. Android 기기로 실시간 UDP 영상 전송 (Low Latency)
- * 3. 10초마다 Flask 서버로 10프레임 묶어서 분석 요청
+ * 3. 30초마다 Flask 서버로 10프레임 묶어서 분석 요청 (이전 요청 완료 후 타이머 시작)
  * 4. 분석 결과 Android 클라이언트(WebSocket) 브로드캐스트
  */
 
@@ -15,8 +15,9 @@ class VideoController {
     constructor() {
         this.currentFrame = null;
         this.frameTimestamp = null;
-        this.analysisInterval = 10000; // 10초 간격
+        this.analysisInterval = 30000; // ✅ 10초 → 30초로 변경 (서버 부하 감소)
         this.analysisIntervalId = null;
+        this.isAnalyzing = false;      // ✅ 요청 중복 실행 방지 플래그
         this.androidClients = new Set(); // WebSocket 클라이언트 관리
         this.flaskServerUrl = process.env.FLASK_SERVER_URL || 'http://127.0.0.1:5000';
         this.analysisResults = [];
@@ -95,7 +96,7 @@ class VideoController {
     async stopAnalysis(req, res) {
         try {
             if (this.analysisIntervalId !== null) {
-                clearInterval(this.analysisIntervalId);
+                clearTimeout(this.analysisIntervalId); // ✅ clearInterval → clearTimeout
                 this.analysisIntervalId = null;
             }
             res.json({ success: true, message: '분석을 중지했습니다.' });
@@ -105,25 +106,43 @@ class VideoController {
     }
 
     /**
-     * 10초마다 Flask로 분석 요청 실행
+     * ✅ 이전 요청이 완전히 끝난 후에만 다음 요청을 예약 (setInterval → 재귀 setTimeout)
+     * - setInterval은 이전 요청이 오래 걸려도 무조건 다음 요청을 쌓아버림
+     * - setTimeout 재귀 방식은 응답을 받은 후 타이머를 시작하므로 요청 중첩 없음
      */
     startFlaskAnalysis() {
-        console.log('[VideoController] Flask 분석 프로세스 시작 (10초 간격)');
-        this.requestFlaskAnalysis();
-        this.analysisIntervalId = setInterval(() => {
-            this.requestFlaskAnalysis();
-        }, this.analysisInterval);
+        console.log('[VideoController] Flask 분석 프로세스 시작 (30초 간격, 중첩 방지)');
+
+        const scheduleNext = async () => {
+            await this.requestFlaskAnalysis();
+
+            // 중지 명령이 들어온 경우 다음 타이머 예약 안 함
+            if (this.analysisIntervalId === null) return;
+
+            this.analysisIntervalId = setTimeout(scheduleNext, this.analysisInterval);
+        };
+
+        // 최초 1회 즉시 실행 후 재귀 예약
+        this.analysisIntervalId = setTimeout(scheduleNext, 0);
     }
 
     /**
      * Flask 서버로 10장의 프레임을 묶어서 분석 요청
      */
     async requestFlaskAnalysis() {
+        // ✅ 혹시 모를 중복 실행 방지 (2중 안전장치)
+        if (this.isAnalyzing) {
+            console.warn('[VideoController] 이전 분석 요청이 아직 진행 중입니다. 건너뜀.');
+            return;
+        }
+
         try {
             if (this.frameBuffer.length < 10) {
                 console.warn('[VideoController] 분석에 필요한 프레임 부족 (현재: ' + this.frameBuffer.length + ')');
                 return;
             }
+
+            this.isAnalyzing = true; // ✅ 요청 시작 플래그
 
             // sharp를 이용해 프레임들을 JPEG(base64) 형태로 변환
             const frames = await Promise.all(
@@ -160,6 +179,8 @@ class VideoController {
             this.broadcastAnalysisResult(analysisResult);
         } catch (error) {
             console.error('[VideoController] Flask 분석 요청 실패:', error.message);
+        } finally {
+            this.isAnalyzing = false; // ✅ 성공/실패 관계없이 플래그 해제
         }
     }
 

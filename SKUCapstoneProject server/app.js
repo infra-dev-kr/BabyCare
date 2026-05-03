@@ -97,12 +97,14 @@ app.get('/api/test-ai-bridge', async (req, res) => {
 // ==========================================
 app.get('/', (req, res) => res.send('🚀 Capstone AI Server Running'));
 
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
     console.log('==============================================');
     console.log(`✅ 서버 실행 성공`);
-    receiver.init(wss)
+
+    await connectDB(); // ✅ 이거 추가
+
+    receiver.init(wss);
     
-    // 자동 시작 트리거
     axios.post(`http://localhost:${PORT}/api/video/start`).catch(() => {});
     axios.post(`http://localhost:${PORT}/api/sound-analysis/start`).catch(() => {});
     
