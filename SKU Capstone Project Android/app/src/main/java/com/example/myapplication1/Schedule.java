@@ -11,12 +11,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -36,25 +34,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Schedule extends AppCompatActivity {
     private static final String CHANNEL_ID = "vaccine_channel";
     private List<AuthModels.VaccineResponse> vaccineList = new ArrayList<>();
+    private List<AuthModels.VaccineResponse> filteredList = new ArrayList<>(); // 90일 필터링용 리스트
     private ApiService apiService;
 
+    // 리사이클러뷰 컴포넌트
     private RecyclerView recyclerView;
     private VaccineAdapter adapter;
-    private TextView tvNextVaccineName, tvNextVaccineDate;
-    private CardView cardUpcomingSummary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
 
-        tvNextVaccineName = findViewById(R.id.tvNextVaccineName);
-        tvNextVaccineDate = findViewById(R.id.tvNextVaccineDate);
-        cardUpcomingSummary = findViewById(R.id.cardUpcomingSummary);
+        // 1. 리사이클러뷰 초기화 (기존 카드뷰 연결 코드 삭제됨)
         recyclerView = findViewById(R.id.rv_vaccine_list);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new VaccineAdapter(vaccineList);
+
+        // 2. 어댑터 연결 (필터링된 리스트를 사용)
+        adapter = new VaccineAdapter(filteredList);
         recyclerView.setAdapter(adapter);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -62,6 +59,7 @@ public class Schedule extends AppCompatActivity {
         createNotificationChannel();
         checkNotificationPermission();
 
+        // Retrofit 설정
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:3001")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -86,19 +84,7 @@ public class Schedule extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
                     vaccineList.clear();
                     vaccineList.addAll(response.body());
-                    adapter.notifyDataSetChanged();
-
-                    if (!vaccineList.isEmpty()) {
-                        AuthModels.VaccineResponse next = vaccineList.get(0);
-                        tvNextVaccineName.setText("D-" + next.dDay + " " + next.name);
-                        tvNextVaccineDate.setText(next.dueDate + " 예정");
-
-                        cardUpcomingSummary.setOnClickListener(v -> showEditDialog(next));
-                        sendNotification("접종 알림", next.name + " 접종일이 얼마 남지 않았습니다!");
-                    } else {
-                        tvNextVaccineName.setText("예정된 접종이 없습니다.");
-                        tvNextVaccineDate.setText("");
-                    }
+                    updateUI(); // 필터링 로직 실행
                 }
             }
 
@@ -109,6 +95,27 @@ public class Schedule extends AppCompatActivity {
         });
     }
 
+    private void updateUI() {
+        // 기존 필터링 리스트 비우기
+        filteredList.clear();
+
+        for (AuthModels.VaccineResponse v : vaccineList) {
+            // 아기 생일 기준 오늘(0)부터 3달(90일) 이내인 모든 일정 추가
+            if (v.dDay >= 0 && v.dDay <= 90) {
+                filteredList.add(v);
+            }
+        }
+
+        // 3. 어댑터에 데이터 변경 알림 (이제 리스트 개수만큼 화면에 다 뜹니다)
+        adapter.notifyDataSetChanged();
+
+        if (!filteredList.isEmpty()) {
+            AuthModels.VaccineResponse first = filteredList.get(0);
+            sendNotification("접종 알림", "조만간 맞아야 할 접종이 " + filteredList.size() + "건 있습니다.");
+        }
+    }
+
+    // 수정 다이얼로그 (수정 기능 유지)
     private void showEditDialog(AuthModels.VaccineResponse item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("접종 일정 수정");
@@ -140,6 +147,7 @@ public class Schedule extends AppCompatActivity {
         });
     }
 
+    // 알림 및 권한 관련 메서드들
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "백신 알림", NotificationManager.IMPORTANCE_DEFAULT);
@@ -158,17 +166,12 @@ public class Schedule extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void sendNotification(String title, String content) {
-        // 1. 알림 매니저 준비
         NotificationManagerCompat manager = NotificationManagerCompat.from(this);
-
-        // 2. 권한 체크 (안드로이드 13 이상)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
         }
-
-        // 3. 알림 빌더 생성
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
@@ -176,7 +179,6 @@ public class Schedule extends AppCompatActivity {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setAutoCancel(true);
 
-        // 4. 알림 발송
         manager.notify(1, builder.build());
     }
 }

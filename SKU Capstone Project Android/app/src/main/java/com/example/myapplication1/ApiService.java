@@ -46,18 +46,26 @@ public interface ApiService {
     @GET("/api/policies")
     Call<List<AuthModels.PolicyResponse>> getPolicies();
 
-    // 📅 백신 스케줄 조회
+    // 📅 백신 스케줄 조회 (서버 구조에 따라 @Query로 변경될 수 있음)
     @GET("/api/vaccines/schedule/{userId}")
     Call<List<AuthModels.VaccineResponse>> getVaccineSchedule(@Path("userId") String userId);
 
-    // ✨ [추가] 백신 일정 수정 (PUT 방식)
-    // vaccineId를 경로로 받고, 수정할 데이터를 VaccineUpdate 객체에 담아 보냅니다.
+    // ✨ 백신 일정 수정 (PUT 방식)
     @PUT("/api/vaccines/update/{vaccineId}")
     Call<Void> updateVaccine(
             @Path("vaccineId") String vaccineId,
             @Body AuthModels.VaccineUpdate request
     );
 
+    // 🌡️ [수정] 최신 온습도 조회: 파라미터 이름을 userId로 통일
+    @GET("/api/temper/latest")
+    Call<AuthModels.TemperHumilityResponse> getLatestTemper(@Query("userId") String userId);
+
+    // 📈 [수정] 온습도 이력 조회: 파라미터 이름을 userId로 통일
+    @GET("/api/temper/history")
+    Call<List<AuthModels.TemperHistoryResponse>> getTemperHistory(@Query("userId") String userId);
+
+    // 😴 수면 데이터 조회
     @GET("/api/sleep/data")
     Call<List<AuthModels.SleepResponse>> getSleepData();
 
