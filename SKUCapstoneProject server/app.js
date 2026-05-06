@@ -46,13 +46,10 @@ const vaccineRouter = require('./src/routes/vaccineRoutes');
 const sleepRoutes = require('./src/routes/sleepRoutes');
 const smartThingsRouter = require('./src/routes/smartThingsRoutes');
 const videoRoutes = require('./src/routes/videoRoutes');
-<<<<<<< HEAD
-const soundAnalysisRoutes = require('./src/routes/Soundanalysisroutes');
-=======
 const soundAnalysisRoutes = require('./src/routes/soundAnalysisRoutes');
->>>>>>> kgj
 const aiRouter = require('./src/routes/airouter');
 const temhuRoutes = require('./src/routes/temhuRoutes');
+
 
 app.use('/auth', authRouter);
 app.use('/api/policies', policyRouter);

@@ -103,29 +103,7 @@ public class AuthModels {
         public VaccineUpdate(String dueDate) { this.dueDate = dueDate; }
     }
 
-<<<<<<< HEAD
-    // === 3. 환경 데이터 및 수면 모델 (핵심 보강) ===
-
-    // 🌡️ 실시간 최신 온습도 수신용 (latest API용)
-    public static class TemperHumilityResponse implements Serializable {
-        @SerializedName("userEmail") public String userEmail;
-        @SerializedName("temperature") public float temperature;
-        @SerializedName("humidity") public float humidity;
-        @SerializedName("sleepScore") public Float sleepScore; // null 대응 위해 Float 사용
-        @SerializedName("timestamp") public String timestamp;
-    }
-
-    // 📈 10분 단위 차트 이력 수신용 (history API용)
-    public static class TemperHistoryResponse implements Serializable {
-        @SerializedName("time") public String time;
-        @SerializedName("temperature") public float temperature;
-        @SerializedName("humidity") public float humidity;
-    }
-
-    // 😴 기존 수면 데이터 모델 (SleepResponse 유지)
-=======
-    // === 3. 환경 데이터 모델 ===
->>>>>>> kgj
+    // === 3. 환경 데이터 모델 (규진님 주석 반영) ===
     public static class SleepResponse implements Serializable {
         @SerializedName("time") public String time;
         @SerializedName("temp") public float temp;
@@ -158,32 +136,28 @@ public class AuthModels {
         @SerializedName("label") public String label;
     }
 
-<<<<<<< HEAD
-    // === 5. 🍼 비디오 분석 결과 모델 ===
-=======
     // === 5. 🍼 비디오 분석 결과 모델 (WebSocket 수신용) ===
     // Node.js가 Flask 결과를 받아 "analysisResult" 타입으로 쏴줄 때 사용함
->>>>>>> kgj
     public static class AnalysisResponse implements Serializable {
         @SerializedName("timestamp") public long timestamp;
         @SerializedName("result") public AnalysisData result;
 
         public static class AnalysisData {
-<<<<<<< HEAD
-=======
             // Node.js의 response.data 부분
->>>>>>> kgj
             @SerializedName("data") public InnerData data;
         }
 
         public static class InnerData {
-<<<<<<< HEAD
-=======
             // Node.js의 response.data.data.result 부분
->>>>>>> kgj
             @SerializedName("result") public DetectionResult detectionResult;
         }
 
+        // 🌡️ 최신 온습도 응답
+        public static class TemperHumilityResponse {
+            public float temperature;
+            public float humidity;
+            public String timestamp;
+        }
         public static class DetectionResult {
             @SerializedName("infant_detected") public boolean infantDetected;
             @SerializedName("confidence") public float confidence;

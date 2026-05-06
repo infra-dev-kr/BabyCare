@@ -96,13 +96,11 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(Call<AuthModels.UserResponse> call, Throwable t) {
                 Log.e(TAG, "Login Network Error: " + t.getMessage());
                 Toast.makeText(MainActivity.this, "서버 연결 실패", Toast.LENGTH_SHORT).show();
-<<<<<<< HEAD
-=======
-                //테스트용
+
+                // [규진님 코드 반영] 테스트용: 서버가 꺼져 있어도 메뉴로 진입 가능하게 처리
                 Intent intent = new Intent(MainActivity.this, Menuactivity.class);
                 startActivity(intent);
                 finish();
->>>>>>> kgj
             }
         });
     }

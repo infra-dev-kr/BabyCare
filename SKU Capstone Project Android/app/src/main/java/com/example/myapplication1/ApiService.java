@@ -15,7 +15,6 @@ import retrofit2.http.Query;
 public interface ApiService {
 
     // === 1. 인증 및 회원 관련 (Auth) ===
-
     @POST("/auth/request-verify")
     Call<AuthModels.UserResponse> requestVerify(@Body AuthModels.VerifyRequest body);
 
@@ -26,7 +25,7 @@ public interface ApiService {
     Call<AuthModels.UserResponse> verifyCode(@Body AuthModels.CodeCheckRequest body);
 
     @POST("/auth/signup")
-    Call<AuthModels.UserResponse> signup(@Body AuthModels.SignupRequest body);
+    Call<AuthModels.SignupRequest> signup(@Body AuthModels.SignupRequest body);
 
     @POST("/auth/login")
     Call<AuthModels.UserResponse> login(@Body AuthModels.LoginRequest body);
@@ -42,36 +41,31 @@ public interface ApiService {
 
 
     // === 2. 데이터 및 스케줄 관련 (Data) ===
-
     @GET("/api/policies")
     Call<List<AuthModels.PolicyResponse>> getPolicies();
 
-    // 📅 백신 스케줄 조회 (서버 구조에 따라 @Query로 변경될 수 있음)
     @GET("/api/vaccines/schedule/{userId}")
     Call<List<AuthModels.VaccineResponse>> getVaccineSchedule(@Path("userId") String userId);
 
-    // ✨ 백신 일정 수정 (PUT 방식)
     @PUT("/api/vaccines/update/{vaccineId}")
     Call<Void> updateVaccine(
             @Path("vaccineId") String vaccineId,
             @Body AuthModels.VaccineUpdate request
     );
 
-    // 🌡️ [수정] 최신 온습도 조회: 파라미터 이름을 userId로 통일
+    // 🌡️ [수정 완료] 규진님의 설계에 따라 SleepResponse 모델을 공통으로 사용합니다.
     @GET("/api/temper/latest")
-    Call<AuthModels.TemperHumilityResponse> getLatestTemper(@Query("userId") String userId);
+    Call<AuthModels.SleepResponse> getLatestTemper(@Query("userId") String userId);
 
-    // 📈 [수정] 온습도 이력 조회: 파라미터 이름을 userId로 통일
+    // 📈 [수정 완료] 이력 조회도 공통 데이터 모델인 SleepResponse 리스트를 사용합니다.
     @GET("/api/temper/history")
-    Call<List<AuthModels.TemperHistoryResponse>> getTemperHistory(@Query("userId") String userId);
+    Call<List<AuthModels.SleepResponse>> getTemperHistory(@Query("userId") String userId);
 
-    // 😴 수면 데이터 조회
     @GET("/api/sleep/data")
     Call<List<AuthModels.SleepResponse>> getSleepData();
 
 
     // === 3. SmartThings 연동 관련 (IoT) ===
-
     @POST("/api/smartthings/register")
     Call<AuthModels.DeviceResponse> registerSTToken(
             @Header("Authorization") String jwtToken,

@@ -61,24 +61,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-<<<<<<< HEAD
-            <!-- ✅ TextureView를 ImageView로 변경 및 ID를 videoView로 수정 -->
-            <ImageView
-                android:id="@+id/videoView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#E0E0E0"
-                android:scaleType="centerCrop" />
-=======
-            <!-- 수정 -->
+            <!-- 규진님 코드 기반: ExoPlayer 전용 PlayerView 사용 -->
             <androidx.media3.ui.PlayerView
                 android:id="@+id/playerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#E0E0E0" />
->>>>>>> kgj
+                android:background="#E0E0E0"
+                app:use_controller="false" />
 
-            <!-- 🍼 아기 감지 상태 표시 오버레이 (선택 사항) -->
+            <!-- 🍼 아기 감지 상태 표시 오버레이 -->
             <TextView
                 android:id="@+id/statusText"
                 android:layout_width="wrap_content"
