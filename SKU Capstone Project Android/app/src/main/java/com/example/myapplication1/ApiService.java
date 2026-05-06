@@ -46,13 +46,11 @@ public interface ApiService {
     @GET("api/policies")
     Call<List<AuthModels.PolicyResponse>> getPolicies();
 
-    // 🔥 핵심 수정: vaccines → vaccine (s 제거)
     @GET("api/vaccine/schedule/{userId}")
     Call<List<AuthModels.VaccineResponse>> getVaccineSchedule(
             @Path("userId") String userId
     );
 
-    // 🔥 서버와 경로 통일
     @PUT("api/vaccine/update/{vaccineId}")
     Call<Void> updateVaccine(
             @Path("vaccineId") String vaccineId,
@@ -89,4 +87,15 @@ public interface ApiService {
             @Header("Authorization") String jwtToken,
             @Query("email") String email
     );
+
+
+    // === 5. AI 보고서 ===  ✅ 추가
+
+    // 최신 보고서 조회
+    @GET("api/ai/report/latest")
+    Call<AuthModels.AiReportResponse> getLatestReport();
+
+    // 수동으로 보고서 생성 요청
+    @POST("api/ai/generate")
+    Call<AuthModels.AiReportResponse> generateReport();
 }

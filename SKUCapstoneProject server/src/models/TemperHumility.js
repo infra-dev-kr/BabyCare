@@ -7,30 +7,25 @@ const temperHumilitySchema = new mongoose.Schema({
     required: true,
     index: true
   },
-
   temperature: {
     type: Number,
     required: true
   },
-
   humidity: {
     type: Number,
     required: true
   },
-
   // 수면 점수 (나중에 계산해서 저장)
   sleepScore: {
     type: Number,
     default: null
   },
-
   timestamp: {
     type: Date,
     default: Date.now
   }
 });
 
-// 모델 중복 방지 (핫리로드 환경에서 중요)
 module.exports =
   mongoose.models.TemperHumility ||
   mongoose.model('TemperHumility', temperHumilitySchema);

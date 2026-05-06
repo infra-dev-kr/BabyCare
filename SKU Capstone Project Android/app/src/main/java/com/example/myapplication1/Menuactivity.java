@@ -16,7 +16,6 @@ import java.net.DatagramSocket;
 
 public class Menuactivity extends AppCompatActivity {
 
-    // 💡 변수 선언 (이게 클래스 바로 밑에 있어야 함)
     private ImageView mainPreview;
     private DatagramSocket socket;
     private Thread receiveThread;
@@ -28,7 +27,6 @@ public class Menuactivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menuactivity);
 
-        // 1. UI 객체 연결
         mainPreview = findViewById(R.id.mainPreview);
         ImageView ivProfile = findViewById(R.id.ivHeaderIcon);
 
@@ -39,7 +37,6 @@ public class Menuactivity extends AppCompatActivity {
         LinearLayout androidBtnReport = findViewById(R.id.btn_report);
         LinearLayout btnPolicy = findViewById(R.id.btn_policy);
 
-        // 2. 클릭 리스너 설정
         ivProfile.setOnClickListener(v -> {
             startActivity(new Intent(Menuactivity.this, mypage.class));
         });
@@ -60,8 +57,9 @@ public class Menuactivity extends AppCompatActivity {
             startActivity(new Intent(Menuactivity.this, GrapeActivity.class));
         });
 
+        // ✅ report.class → GptReportActivity.class 로 변경
         androidBtnReport.setOnClickListener(v -> {
-            startActivity(new Intent(Menuactivity.this, report.class));
+            startActivity(new Intent(Menuactivity.this, GptReportActivity.class));
         });
 
         btnPolicy.setOnClickListener(v -> {

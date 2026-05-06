@@ -99,8 +99,9 @@ public class AuthModels {
         @SerializedName("degree") public int degree;
         @SerializedName("dueDate") public String dueDate;
         @SerializedName("dDay") public int dDay;
-        @SerializedName("targetMonthString") public String targetMonthString; // ✅ 추가
+        @SerializedName("targetMonthString") public String targetMonthString;
         @SerializedName("description") public String description;
+        @SerializedName("status") public String status;
     }
 
     public static class VaccineUpdate {
@@ -177,5 +178,26 @@ public class AuthModels {
             @SerializedName("infant_detected") public boolean infantDetected;
             @SerializedName("confidence") public float confidence;
         }
+    }
+
+    // === 5. AI 보고서 ===  ✅ 추가
+
+    public static class AiReportResponse implements Serializable {
+        @SerializedName("success") public boolean success;
+        @SerializedName("data") public AiReportData data;
+    }
+
+    public static class AiReportData implements Serializable {
+        @SerializedName("_id") public String id;
+        @SerializedName("reportType") public String reportType;
+        @SerializedName("periodStart") public String periodStart;
+        @SerializedName("periodEnd") public String periodEnd;
+        @SerializedName("avgTemp") public double avgTemp;
+        @SerializedName("avgHumidity") public double avgHumidity;
+        @SerializedName("avgNoise") public double avgNoise;
+        @SerializedName("avgScore") public double avgScore;
+        @SerializedName("cryingCount") public int cryingCount;
+        @SerializedName("reportText") public String reportText;
+        @SerializedName("createdAt") public String createdAt;
     }
 }

@@ -1,15 +1,17 @@
 const mongoose = require('mongoose');
 
 const scheduleSchema = new mongoose.Schema({
-    dose: { type: Number, required: true },
-    recommendedAge: { type: String, required: true } // "출생 시", "2개월"
+    dose: Number,
+    targetMonthString: String,
+    minMonth: Number,
+    maxMonth: Number
 }, { _id: false });
 
 const vaccineSchema = new mongoose.Schema({
-    vaccineCode: { type: String },
-    vaccineName: { type: String, required: true },
+    vaccineCode: String,
+    vaccineName: String,
     schedule: [scheduleSchema],
-    isNationalProgram: { type: Boolean, default: false }
+    isNationalProgram: Boolean
 });
 
 module.exports = mongoose.model('Vaccine', vaccineSchema);
