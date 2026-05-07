@@ -10,6 +10,7 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -72,30 +73,38 @@ public interface ApiService {
     @GET("api/sleep/data")
     Call<List<AuthModels.SleepResponse>> getSleepData();
 
+    // ✅ 온습도 최신 데이터 조회
+    @GET("api/temhu/latest")
+    Call<AuthModels.TemperHumilityResponse> getTemhuLatest(
+            @Query("userId") String userId
+    );
+
+    // ✅ 온습도 12시간 이력 조회
+    @GET("api/temhu/history")
+    Call<List<AuthModels.TemperHistoryResponse>> getTemhuHistory(
+            @Query("userId") String userId
+    );
+
 
     // === 4. SmartThings (IoT) ===
 
-    // PAT 등록
     @POST("api/smartthings/register")
     Call<AuthModels.DeviceResponse> registerSTToken(
             @Header("Authorization") String jwtToken,
             @Body AuthModels.STTokenRequest body
     );
 
-    // ✅ 디바이스 목록 조회 (List → DeviceResponse 단일로 수정)
     @GET("api/smartthings/devices")
     Call<AuthModels.DeviceResponse> getDevices(
             @Header("Authorization") String jwtToken
     );
 
-    // ✅ 디바이스 상태 조회
     @GET("api/smartthings/status/{deviceId}")
     Call<AuthModels.DeviceStatusResponse> getDeviceStatus(
             @Header("Authorization") String jwtToken,
             @Path("deviceId") String deviceId
     );
 
-    // ✅ 디바이스 제어
     @POST("api/smartthings/control")
     Call<AuthModels.ControlResponse> controlDevice(
             @Header("Authorization") String jwtToken,

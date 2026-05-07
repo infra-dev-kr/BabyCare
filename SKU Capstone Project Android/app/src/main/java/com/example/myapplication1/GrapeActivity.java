@@ -32,31 +32,27 @@ public class GrapeActivity extends AppCompatActivity {
     private ImageButton btnBack;
 
     private ApiService apiService;
-    private String userId; // 이메일 대신 아이디(lkms1472) 사용
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grape);
 
-        // 1. Retrofit 초기화 (포트 3001)
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://10.0.2.2:3001/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiService = retrofit.create(ApiService.class);
 
-        // 2. SharedPreferences에서 아이디 가져오기 (키값은 MainActivity의 userEmail 사용)
         SharedPreferences pref = getSharedPreferences("UserPrefs", MODE_PRIVATE);
         userId = pref.getString("userEmail", "lkms1472");
 
-        // 3. UI 요소 연결
         initViews();
 
-        // 4. 뒤로가기 리스너 (GptReport 리스너는 삭제함)
         btnBack.setOnClickListener(v -> finish());
 
-        // 5. 데이터 로드 시작
+        // ✅ 데이터 로드
         loadEnvironmentHistory();
     }
 
@@ -68,17 +64,19 @@ public class GrapeActivity extends AppCompatActivity {
         tvHumidity = findViewById(R.id.tv_humidity);
         tvNoise = findViewById(R.id.tv_noise);
         btnBack = findViewById(R.id.btn_back);
-
-        // 💡 btn_gpt_report 관련 findViewById는 삭제했습니다.
     }
 
     private void loadEnvironmentHistory() {
-        // userId(lkms1472)를 사용하여 서버 조회
-        apiService.getTemperHistory(userId).enqueue(new Callback<List<AuthModels.TemperHistoryResponse>>() {
+        // ✅ getTemperHistory → getTemhuHistory 로 변경
+        apiService.getTemhuHistory(userId).enqueue(new Callback<List<AuthModels.TemperHistoryResponse>>() {
             @Override
-            public void onResponse(Call<List<AuthModels.TemperHistoryResponse>> call, Response<List<AuthModels.TemperHistoryResponse>> response) {
+            public void onResponse(Call<List<AuthModels.TemperHistoryResponse>> call,
+                                   Response<List<AuthModels.TemperHistoryResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    Log.d("GrapeActivity", "이력 데이터 수신: " + response.body().size() + "개");
                     updateChartUI(response.body());
+                } else {
+                    Log.e("GrapeActivity", "이력 응답 실패: " + response.code());
                 }
             }
 
@@ -92,20 +90,39 @@ public class GrapeActivity extends AppCompatActivity {
     }
 
     private void loadLatestStatus() {
-        apiService.getLatestTemper(userId).enqueue(new Callback<AuthModels.TemperHumilityResponse>() {
+        // ✅ getLatestTemper → getTemhuLatest 로 변경
+        apiService.getTemhuLatest(userId).enqueue(new Callback<AuthModels.TemperHumilityResponse>() {
             @Override
-            public void onResponse(Call<AuthModels.TemperHumilityResponse> call, Response<AuthModels.TemperHumilityResponse> response) {
+            public void onResponse(Call<AuthModels.TemperHumilityResponse> call,
+                                   Response<AuthModels.TemperHumilityResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     AuthModels.TemperHumilityResponse data = response.body();
-                    tvSleepScore.setText(data.sleepScore != null ? Math.round(data.sleepScore) + "점" : "--");
+                    Log.d("GrapeActivity", "최신 온도: " + data.temperature + ", 습도: " + data.humidity);
+
+                    // ✅ 수면 점수
+                    tvSleepScore.setText(data.sleepScore != null
+                            ? Math.round(data.sleepScore) + "점" : "--");
+
+                    // ✅ 온도
                     tvCurrentTemp.setText(String.format("%.1f°C", data.temperature));
+
+                    // ✅ 습도
                     tvHumidity.setText(String.format("%.0f%%", data.humidity));
+
+                } else {
+                    Log.e("GrapeActivity", "최신 데이터 응답 실패: " + response.code());
+                    tvCurrentTemp.setText("--°C");
+                    tvHumidity.setText("--%");
+                    tvSleepScore.setText("--");
                 }
             }
 
             @Override
             public void onFailure(Call<AuthModels.TemperHumilityResponse> call, Throwable t) {
                 Log.e("GrapeActivity", "최신 데이터 로드 실패: " + t.getMessage());
+                tvCurrentTemp.setText("--°C");
+                tvHumidity.setText("--%");
+                tvSleepScore.setText("--");
             }
         });
     }
@@ -124,7 +141,7 @@ public class GrapeActivity extends AppCompatActivity {
             if (timeLabel != null && timeLabel.length() > 16) {
                 timeLabel = timeLabel.substring(11, 16); // HH:mm 추출
             }
-            labels.add(timeLabel);
+            labels.add(timeLabel != null ? timeLabel : "");
         }
 
         configureChart(tempEntries, labels);

@@ -1,13 +1,11 @@
 const TemperHumility = require('../models/TemperHumility');
 
-// 메모리에 센서 데이터를 임시 저장할 배열 (버퍼)
 let sensorBuffer = [];
 
 /**
- * 1. 센서에서 데이터를 받아 버퍼에 넣는 함수 (IoT -> Node)
+ * 1. IoT → Node.js 데이터 수신
  */
 exports.receiveSensorData = (req, res) => {
-    // 앱과 통일하기 위해 userId로 받음
     const { temperature, humidity, userId } = req.body;
 
     if (temperature === undefined || humidity === undefined || !userId) {
@@ -15,31 +13,30 @@ exports.receiveSensorData = (req, res) => {
     }
 
     sensorBuffer.push({
-        userID: userId, // DB 필드명인 userID에 저장
+        userId: userId,  // ✅ 스키마 필드명 통일
         temperature,
         humidity,
         timestamp: new Date()
     });
 
+    console.log(`[버퍼 저장] userId: ${userId}, 온도: ${temperature}, 습도: ${humidity}`);
     res.status(200).json({ message: '데이터가 버퍼에 저장되었습니다.' });
 };
 
 /**
- * 2. 안드로이드 앱에서 최신 데이터를 가져가는 함수 (Node -> Android)
+ * 2. Android → 최신 데이터 조회
  */
 exports.getLatestData = async (req, res) => {
-    // 앱이 보낸 ?userId=... 값을 가져옴
     const { userId } = req.query;
 
-    try {
-        // DB 필드명 userID와 앱에서 온 userId를 매칭
-        const query = userId ? { userId: userId } : {};
+    try {  // ✅ 오타 제거
+        const query = userId ? { userId: userId } : {};  // ✅ 필드명 통일
         const latestData = await TemperHumility.findOne(query).sort({ timestamp: -1 });
-        
+
         if (!latestData) {
             return res.status(404).json({ message: "저장된 데이터가 없습니다." });
         }
-        
+
         res.status(200).json(latestData);
     } catch (error) {
         res.status(500).json({ message: "데이터 조회 중 오류 발생", error: error.message });
@@ -47,7 +44,7 @@ exports.getLatestData = async (req, res) => {
 };
 
 /**
- * 3. 10분 단위로 그룹화된 온습도 이력을 반환하는 함수 (Node -> Android)
+ * 3. Android → 12시간 이력 조회 (10분 단위)
  */
 exports.getHistoryData = async (req, res) => {
     const { userId } = req.query;
@@ -62,7 +59,7 @@ exports.getHistoryData = async (req, res) => {
         const history = await TemperHumility.aggregate([
             {
                 $match: {
-                    userID: userId, // 💡 DB 필드명 userID 사용
+                    userId: userId,  // ✅ 필드명 통일
                     timestamp: { $gte: startTime }
                 }
             },
@@ -96,7 +93,7 @@ exports.getHistoryData = async (req, res) => {
 };
 
 /**
- * 4. 60초마다 버퍼의 데이터를 DB에 일괄 저장
+ * 4. 10분마다 버퍼 → MongoDB 저장
  */
 exports.saveBufferToDB = async () => {
     if (sensorBuffer.length === 0) return;
@@ -106,9 +103,9 @@ exports.saveBufferToDB = async () => {
 
     try {
         await TemperHumility.insertMany(dataToInsert);
-        console.log(`[DB 적재 완료] ${dataToInsert.length}개의 데이터 저장됨.`);
+        console.log(`[DB 적재 완료] ${dataToInsert.length}개 저장됨.`);
     } catch (error) {
         console.error('[DB 적재 실패]', error);
-        sensorBuffer = [...dataToInsert, ...sensorBuffer]; 
+        sensorBuffer = [...dataToInsert, ...sensorBuffer];
     }
 };

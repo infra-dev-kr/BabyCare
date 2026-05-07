@@ -42,7 +42,7 @@ public class Menuactivity extends AppCompatActivity {
         });
 
         btnEnvironment.setOnClickListener(v -> {
-            startActivity(new Intent(Menuactivity.this, enviroment.class));
+            startActivity(new Intent(Menuactivity.this,EnvironmentActivity.class));
         });
 
         btnCamera.setOnClickListener(v -> {
