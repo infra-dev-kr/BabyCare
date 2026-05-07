@@ -41,7 +41,7 @@ const temhuRoutes = require('./src/routes/temhuRoutes');
 
 app.use('/auth', authRouter);
 app.use('/api/policies', policyRouter);
-app.use('/api/vaccine', vaccineRouter);  // ✅ vaccines → vaccine 수정
+app.use('/api/vaccine', vaccineRouter);
 app.use('/api/Sleep', sleepRoutes);
 app.use('/api/SmartThings', smartThingsRouter);
 app.use('/api/video', videoRoutes);
@@ -51,16 +51,25 @@ app.use('/api/temhu', temhuRoutes);
 
 app.use('/stream', express.static(path.join(__dirname, 'public/stream')));
 
+// 30초마다 온습도 버퍼 DB 저장
 setInterval(() => {
     temhuController.saveBufferToDB(); 
 }, 30000);
 
-cron.schedule('0 0 * * * *', () => {
-    console.log('⏰ [Hourly] 1시간 단위 수면 점수 집계 시작...');
-    sleepController.processHourlyScore();
+// ✅ 10분마다 수면점수 계산 → temperhumilities에 저장
+cron.schedule('*/10 * * * *', () => {
+    console.log('⏰ [10분] 수면 점수 계산 및 저장 시작...');
+    sleepController.processHourlyBatch();
 });
 
-cron.schedule('0 0 8 * * *', () => {
+// ✅ 1시간마다 수면 점수 집계
+cron.schedule('0 * * * *', () => {
+    console.log('⏰ [Hourly] 1시간 단위 수면 점수 집계 시작...');
+    sleepController.processHourlyBatch();
+});
+
+// 매일 아침 8시 AI 보고서 생성
+cron.schedule('0 8 * * *', () => {
     console.log('🌅 [Daily] 아침 8시! GPT 수면 상황 요약 생성 중...');
     sleepController.generateDailyComprehensiveReport();
 });
@@ -78,7 +87,7 @@ server.listen(PORT, async () => {
         axios.post(`http://localhost:${PORT}/api/sound-analysis/start`).catch(() => {});
         
         console.log(`🚀 서버 가동 중: http://localhost:${PORT}`);
-        console.log('⏳ 배치 작업 모드(30초/1시간/8시)가 활성화되었습니다.');
+        console.log('⏳ 배치 작업 모드(10분/1시간/8시)가 활성화되었습니다.');
     } catch (err) {
         console.error("❌ 서버 초기화 중 오류 발생:", err.message);
     }
