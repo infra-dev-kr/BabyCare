@@ -10,7 +10,6 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
 
 public interface ApiService {
 
@@ -76,26 +75,39 @@ public interface ApiService {
 
     // === 4. SmartThings (IoT) ===
 
+    // PAT 등록
     @POST("api/smartthings/register")
     Call<AuthModels.DeviceResponse> registerSTToken(
             @Header("Authorization") String jwtToken,
-            @Body AuthModels.STTokenRequest request
+            @Body AuthModels.STTokenRequest body
     );
 
+    // ✅ 디바이스 목록 조회 (List → DeviceResponse 단일로 수정)
     @GET("api/smartthings/devices")
-    Call<AuthModels.DeviceResponse> getRegisteredDevices(
+    Call<AuthModels.DeviceResponse> getDevices(
+            @Header("Authorization") String jwtToken
+    );
+
+    // ✅ 디바이스 상태 조회
+    @GET("api/smartthings/status/{deviceId}")
+    Call<AuthModels.DeviceStatusResponse> getDeviceStatus(
             @Header("Authorization") String jwtToken,
-            @Query("email") String email
+            @Path("deviceId") String deviceId
+    );
+
+    // ✅ 디바이스 제어
+    @POST("api/smartthings/control")
+    Call<AuthModels.ControlResponse> controlDevice(
+            @Header("Authorization") String jwtToken,
+            @Body AuthModels.ControlRequest body
     );
 
 
-    // === 5. AI 보고서 ===  ✅ 추가
+    // === 5. AI 보고서 ===
 
-    // 최신 보고서 조회
     @GET("api/ai/report/latest")
     Call<AuthModels.AiReportResponse> getLatestReport();
 
-    // 수동으로 보고서 생성 요청
     @POST("api/ai/generate")
     Call<AuthModels.AiReportResponse> generateReport();
 }

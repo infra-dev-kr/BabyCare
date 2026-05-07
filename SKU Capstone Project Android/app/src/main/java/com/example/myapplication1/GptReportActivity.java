@@ -28,13 +28,12 @@ public class GptReportActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_report);
+        setContentView(R.layout.activity_gpt_report); // ✅ 수정
 
         tvReportTitle = findViewById(R.id.tvReportTitle);
         tvReportContent = findViewById(R.id.tvReportContent);
         btnBack = findViewById(R.id.btnBack);
 
-        // ✅ Menuactivity로 이동
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(GptReportActivity.this, Menuactivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

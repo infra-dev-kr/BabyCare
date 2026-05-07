@@ -162,6 +162,37 @@ public class AuthModels {
         @SerializedName("label") public String label;
     }
 
+    // ✅ 디바이스 상태 응답
+    public static class DeviceStatusResponse implements Serializable {
+        @SerializedName("ok") public boolean ok;
+        @SerializedName("deviceId") public String deviceId;
+        @SerializedName("temperature") public double temperature;
+        @SerializedName("humidity") public double humidity;
+    }
+
+    // ✅ 디바이스 제어 요청
+    public static class ControlRequest implements Serializable {
+        @SerializedName("deviceId") public String deviceId;
+        @SerializedName("capability") public String capability;
+        @SerializedName("command") public String command;
+        @SerializedName("value") public double value;
+
+        public ControlRequest(String deviceId, String capability, String command, double value) {
+            this.deviceId = deviceId;
+            this.capability = capability;
+            this.command = command;
+            this.value = value;
+        }
+    }
+
+    // ✅ 디바이스 제어 응답
+    public static class ControlResponse implements Serializable {
+        @SerializedName("ok") public boolean ok;
+        @SerializedName("message") public String message;
+        @SerializedName("temperature") public double temperature;
+        @SerializedName("humidity") public double humidity;
+    }
+
     public static class AnalysisResponse implements Serializable {
         @SerializedName("timestamp") public long timestamp;
         @SerializedName("result") public AnalysisData result;
@@ -180,7 +211,7 @@ public class AuthModels {
         }
     }
 
-    // === 5. AI 보고서 ===  ✅ 추가
+    // === 5. AI 보고서 ===
 
     public static class AiReportResponse implements Serializable {
         @SerializedName("success") public boolean success;
