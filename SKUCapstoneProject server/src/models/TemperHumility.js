@@ -20,6 +20,17 @@ const temperHumilitySchema = new mongoose.Schema({
     type: Number,
     default: null
   },
+
+  // 울음 감지 데이터
+  cryDetected: {
+    type: Boolean,
+    default: false
+  },
+  cryProbability: {
+    type: Number,   // 0.0 ~ 1.0
+    default: null
+  },
+
   timestamp: {
     type: Date,
     default: Date.now
