@@ -4,11 +4,9 @@
  * 1. IoT 카메라 영상 수신 (onFrame)
  * 2. Android 기기로 실시간 UDP 영상 전송 (Low Latency)
  * 3. 30초마다 Flask 서버로 10프레임 묶어서 분석 요청 (이전 요청 완료 후 타이머 시작)
- * 4. 분석 결과 Android 클라이언트(WebSocket) 브로드캐스트
  */
 
 const axios = require('axios');
-const dgram = require('dgram'); // UDP 통신용
 const sharp = require('sharp'); // 이미지 리사이징 및 압축용
 
 class VideoController {
@@ -22,13 +20,6 @@ class VideoController {
         this.flaskServerUrl = process.env.FLASK_SERVER_URL || 'http://127.0.0.1:5000';
         this.analysisResults = [];
         this.frameBuffer = []; // 분석용 10장 버퍼
-
-        // -----------------------------------------------------------
-        // ✅ [UDP 설정] 안드로이드 실시간 스트리밍용
-        // -----------------------------------------------------------
-        this.udpSocket = dgram.createSocket('udp4');
-        this.androidUdpIp = '192.168.0.10'; // 👈 실제 안드로이드폰 IP로 반드시 수정!
-        this.androidUdpPort = 5005;        // 👈 안드로이드 수신 포트 번호
     }
 
     /**
@@ -44,36 +35,8 @@ class VideoController {
         if (this.frameBuffer.length > 10) {
             this.frameBuffer.shift();
         }
-
-        // 2. ✅ [핵심] 안드로이드로 실시간 영상 쏴주기 (UDP)
-        this.sendVideoToAndroid(videoFrame);
     }
 
-    /**
-     * 실시간 영상을 JPEG로 압축하여 안드로이드로 UDP 전송
-     */
-    async sendVideoToAndroid(rawFrame) {
-        try {
-            // raw 데이터(2.7MB)는 너무 커서 UDP 전송이 불가능하므로 압축 필수
-            const compressedBuffer = await sharp(rawFrame, {
-                raw: { width: 1280, height: 720, channels: 3 }
-            })
-            .resize(640, 360)      // 전송 효율을 위해 해상도 축소
-            .jpeg({ quality: 60 })  // 용량을 줄이기 위해 품질 60으로 설정
-            .toBuffer();
-
-            // 안드로이드 기기로 전송
-            this.udpSocket.send(
-                compressedBuffer, 
-                0, 
-                compressedBuffer.length, 
-                this.androidUdpPort, 
-                this.androidUdpIp
-            );
-        } catch (error) {
-            // console.error('[UDP 전송 실패]', error.message);
-        }
-    }
 
     /**
      * 분석 시작 명령 (라우터에서 호출)
