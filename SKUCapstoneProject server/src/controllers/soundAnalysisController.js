@@ -18,12 +18,19 @@ class SoundAnalysisController {
     this.isAnalyzing = false;
     this.isRunning = false;
     this.intervalId = null;
-    this.app = null; // ✅ server.js에서 app 주입받을 변수
+    this.app = null;
+    this.userId = null; // ✅ receiver.init()에서 주입받음
   }
 
   // ✅ server.js에서 app 주입 (io 접근용)
   setApp(app) {
     this.app = app;
+  }
+
+  // ✅ receiver.init()에서 userId 주입
+  setUserId(userId) {
+    this.userId = userId;
+    console.log(`[SoundAnalysisController] userId 설정됨: ${userId}`);
   }
 
   onAudio(audioChunk) {
@@ -147,11 +154,15 @@ class SoundAnalysisController {
       if (response.data.data.cry_detected === true) {
         console.log('[SoundAnalysisController] 울음 감지됨!');
 
+        if (!this.userId) {
+          console.warn('[SoundAnalysisController] userId가 설정되지 않아 저장 불가');
+          return;
+        }
+
         const io = this.app ? this.app.get('io') : null;
-        const userId = 'lkms1472'; // ⚠️ TODO: 실제 userId 관리 방식에 맞게 수정 필요
         const cryProbability = response.data.data.cry_probability ?? null;
 
-        await temhuController.saveCryEvent(userId, cryProbability, io);
+        await temhuController.saveCryEvent(this.userId, cryProbability, io);
       }
 
     } catch (error) {

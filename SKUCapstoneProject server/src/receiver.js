@@ -10,7 +10,10 @@ const soundAnalysisController = require('./controllers/soundAnalysisController')
 let wss
 
 // HLS 파일 저장 폴더 생성
-const hlsDir = path.join(__dirname, '../public/stream')
+const UDP_PORT = parseInt(process.env.UDP_PORT) || 8888
+const HLS_DIR  = process.env.HLS_DIR || path.resolve(__dirname, '../public/stream')
+const hlsDir   = HLS_DIR
+const CAMERA_TIMEOUT_MS = parseInt(process.env.CAMERA_TIMEOUT_MS) || 5000
 if (!fs.existsSync(hlsDir)) {
     fs.mkdirSync(hlsDir, { recursive: true })
 } else {
@@ -38,16 +41,16 @@ udpServer.on('message', (msg) => {
     hlsProcess.stdin.write(msg)
 })
 
-// 5초 이상 데이터 없으면 HLS 파일 삭제 (카메라 끊김 감지)
+// CAMERA_TIMEOUT_MS 이상 데이터 없으면 HLS 파일 삭제 (카메라 끊김 감지)
 setInterval(() => {
-    if (Date.now() - lastMessageTime > 5000) {
+    if (Date.now() - lastMessageTime > CAMERA_TIMEOUT_MS) {
         if (fs.existsSync(hlsDir)) {
             fs.readdirSync(hlsDir).forEach(file => {
                 fs.unlinkSync(path.join(hlsDir, file))
             })
         }
     }
-}, 5000)
+}, CAMERA_TIMEOUT_MS)
 
 udpServer.on('error', (err) => {
     console.error('UDP 에러:', err)
@@ -99,18 +102,20 @@ const hlsProcess = spawn('ffmpeg', [
     '-f', 'hls',
     '-hls_time', '1',                            // 2초짜리 조각
     '-hls_list_size', '2',                       // 최근 3개 조각만 유지
-    '-hls_flags', 'delete_segments+append_list',             // 오래된 파일 자동 삭제
-    '-hls_allow_cache', '0',                       // ← 캐시 비활성화 추가
-    '-hls_segment_filename', path.join(hlsDir, 'streamingfile%d.ts'),  // ← 세그먼트 파일명 명시
+    '-hls_flags', 'delete_segments+append_list', // 오래된 파일 자동 삭제
+    '-hls_allow_cache', '0',                     // 캐시 비활성화
+    '-hls_segment_filename', path.join(hlsDir, 'streamingfile%d.ts'),
     path.join(hlsDir, 'streamingfile.m3u8')
 ], {
     stdio: ['pipe', 'pipe', 'pipe']
 })
 
-function init(wssInstance) {
+// ✅ userId를 함께 받아서 soundAnalysisController에 주입
+function init(wssInstance, userId) {
     wss = wssInstance
-    udpServer.bind(8888, () => {
-        console.log('📡 UDP 수신 대기 중 (8888)')
+    soundAnalysisController.setUserId(userId)
+    udpServer.bind(UDP_PORT, () => {
+        console.log(`📡 UDP 수신 대기 중 (${UDP_PORT})`)
     })
 }
 

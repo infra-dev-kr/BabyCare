@@ -26,7 +26,7 @@ app.set('wss', wss);
 // Socket.IO (Android realtime)
 // =========================================================
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: process.env.CORS_ORIGIN || '*' }
 });
 app.set('io', io);
 
@@ -47,12 +47,14 @@ io.on('connection', (socket) => {
 // Middleware
 // =========================================================
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';
+const REQUEST_LIMIT = process.env.REQUEST_LIMIT || '50mb';
 
 // 🔥 도커/내부 호출용 URL
 const BASE_URL = process.env.INTERNAL_API_URL || `http://127.0.0.1:${PORT}`;
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: REQUEST_LIMIT }));
+app.use(express.urlencoded({ limit: REQUEST_LIMIT, extended: true }));
 
 app.use((req, res, next) => {
   console.log("==============================================");
@@ -105,6 +107,8 @@ app.use('/api/sound-analysis', soundAnalysisRoutes);
 // =========================================================
 // STREAM
 // =========================================================
+const HLS_DIR = process.env.HLS_DIR || path.resolve(__dirname, 'public/stream');
+
 app.use('/stream', (req, res, next) => {
   if (req.path.endsWith('.m3u8')) {
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
@@ -113,27 +117,32 @@ app.use('/stream', (req, res, next) => {
     res.setHeader('Content-Type', 'video/mp2t');
   }
   next();
-}, express.static(path.join(__dirname, 'public/stream')));
+}, express.static(HLS_DIR));
 
 // =========================================================
 // CRON JOBS
 // =========================================================
 
+const BUFFER_SAVE_INTERVAL_MS = parseInt(process.env.BUFFER_SAVE_INTERVAL_MS) || 30000;
+const CRON_SLEEP_BATCH     = process.env.CRON_SLEEP_BATCH     || '*/10 * * * *';
+const CRON_SLEEP_HOURLY    = process.env.CRON_SLEEP_HOURLY    || '0 * * * *';
+const CRON_DAILY_REPORT    = process.env.CRON_DAILY_REPORT    || '0 8 * * *';
+
 setInterval(() => {
   temhuController.saveBufferToDB();
-}, 30000);
+}, BUFFER_SAVE_INTERVAL_MS);
 
-cron.schedule('*/10 * * * *', () => {
-  console.log('⏰ [10분] 수면 점수 계산');
-  sleepController.processHourlyBatch();
+cron.schedule(CRON_SLEEP_BATCH, () => {
+  console.log('⏰ [배치] 수면 점수 계산');
+  sleepController.processHourlyBatch(process.env.DEFAULT_USER_ID);
 });
 
-cron.schedule('0 * * * *', () => {
+cron.schedule(CRON_SLEEP_HOURLY, () => {
   console.log('⏰ [1시간] 수면 점수 집계');
-  sleepController.processHourlyBatch();
+  sleepController.processHourlyBatch(process.env.DEFAULT_USER_ID);
 });
 
-cron.schedule('0 8 * * *', () => {
+cron.schedule(CRON_DAILY_REPORT, () => {
   console.log('🌅 [AI] 일일 리포트 생성');
   sleepController.generateDailyComprehensiveReport();
 });
@@ -142,23 +151,29 @@ cron.schedule('0 8 * * *', () => {
 // SERVER START
 // =========================================================
 
-server.listen(PORT, '0.0.0.0', async () => {
+server.listen(PORT, HOST, async () => {
     console.log('==============================================');
 
     try {
         await connectDB();
         console.log(`✅ MongoDB 연결 성공`);
 
-        receiver.init(wss);
-        console.log(`✅ WebSocket(Receiver) 초기화 성공`);
+        const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID;
+        if (!DEFAULT_USER_ID) {
+            throw new Error('DEFAULT_USER_ID 환경변수가 설정되지 않았습니다.');
+        }
+
+        receiver.init(wss, DEFAULT_USER_ID);
+        console.log(`✅ WebSocket(Receiver) 초기화 성공 (userId: ${DEFAULT_USER_ID})`);
         axios.post(`${BASE_URL}/api/video/start`).catch(() => {});
         axios.post(`${BASE_URL}/api/sound-analysis/start`).catch(() => {});
 
-        console.log(`🚀 서버 가동 중: http://0.0.0.0:${PORT}`);
+        console.log(`🚀 서버 가동 중: http://${HOST}:${PORT}`);
         console.log(`🔗 내부 BASE_URL: ${BASE_URL}`);
 
     } catch (err) {
         console.error("❌ 서버 초기화 중 오류 발생:", err.message);
+        process.exit(1); // 쿠버네티스 restartPolicy에 의해 재시작됨
     }
 
     console.log('==============================================');

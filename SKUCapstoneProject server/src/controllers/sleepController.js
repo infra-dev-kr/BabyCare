@@ -1,6 +1,6 @@
 const { MLR } = require('ml-regression');
 const Sleep = require('../models/Sleep');
-const TemperHumility = require('../models/TemperHumility');  // ✅ 추가
+const TemperHumility = require('../models/TemperHumility');
 const aiController = require('./aiController');
 
 let sleepModel = null;
@@ -14,8 +14,13 @@ const calcScore = (temp, humidity, noise, isCrying) => {
     return Math.max(0, Math.min(100, Math.round(score)));
 };
 
-exports.processHourlyBatch = async () => {
+// ✅ userId를 받아서 해당 유저의 temperhumilities에 sleepScore 저장
+exports.processHourlyBatch = async (userId) => {
     try {
+        if (!userId) {
+            return console.warn("[Batch] userId가 없어 temperhumilities 업데이트를 건너뜁니다.");
+        }
+
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
         const stats = await Sleep.aggregate([
@@ -34,7 +39,7 @@ exports.processHourlyBatch = async () => {
         const { avgT, avgH, avgN, cryingCount } = stats[0];
         const hourlyScore = calcScore(avgT, avgH, avgN, cryingCount > 0);
 
-        // ✅ Sleep 컬렉션에 저장
+        // Sleep 컬렉션에 저장
         const summaryRecord = new Sleep({
             temp: avgT.toFixed(1),
             humidity: avgH.toFixed(1),
@@ -45,14 +50,14 @@ exports.processHourlyBatch = async () => {
         });
         await summaryRecord.save();
 
-        // ✅ temperhumilities 최신 데이터에 sleepScore 업데이트
+        // ✅ 해당 userId의 최신 temperhumilities에 sleepScore 업데이트
         await TemperHumility.findOneAndUpdate(
-            {},
+            { userId },
             { $set: { sleepScore: hourlyScore } },
             { sort: { timestamp: -1 } }
         );
 
-        console.log(`[Batch] ${new Date().getHours()}시 집계 완료: ${hourlyScore}점 → temperhumilities 업데이트`);
+        console.log(`[Batch] ${new Date().getHours()}시 집계 완료: ${hourlyScore}점 → userId: ${userId} temperhumilities 업데이트`);
 
     } catch (err) {
         console.error("Hourly Batch 에러:", err);
@@ -80,7 +85,6 @@ exports.updateSleepScoreForUser = async (userId) => {
         const { avgT, avgH, avgN, cryingCount } = stats[0];
         const score = calcScore(avgT, avgH, avgN, cryingCount > 0);
 
-        // ✅ 해당 userId의 최신 temperhumilities에 sleepScore 저장
         await TemperHumility.findOneAndUpdate(
             { userId },
             { $set: { sleepScore: score } },
