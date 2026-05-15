@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const temhuController = require('../controllers/TemhuController');
 
+<<<<<<< HEAD
 // IoT → 데이터 전송: POST /api/temhu
 router.post('/', temhuController.receiveSensorData);
 
+=======
+>>>>>>> kgj
 // Android → 최신 데이터: GET /api/temhu/latest
 router.get('/latest', temhuController.getLatestData);
 

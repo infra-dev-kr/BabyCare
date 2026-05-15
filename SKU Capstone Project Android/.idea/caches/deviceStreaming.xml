@@ -1223,6 +1223,7 @@
         <PersistentDeviceSelectionData>
           <option name="api" value="36" />
           <option name="brand" value="samsung" />
+<<<<<<< HEAD
           <option name="codename" value="m1q" />
           <option name="id" value="m1q" />
           <option name="labId" value="google" />
@@ -1235,6 +1236,8 @@
         <PersistentDeviceSelectionData>
           <option name="api" value="36" />
           <option name="brand" value="samsung" />
+=======
+>>>>>>> kgj
           <option name="codename" value="m2q" />
           <option name="id" value="m2q" />
           <option name="labId" value="google" />

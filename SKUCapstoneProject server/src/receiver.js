@@ -2,10 +2,12 @@ const dgram = require('dgram')
 const { spawn } = require('child_process')
 const path = require('path')
 const fs = require('fs')
+const mqtt = require('mqtt')
 
 //8888포트로 들어온 영상 중 프레임만 비디오컨트롤러로 보내기 위함
 const videoController = require('./controllers/videoController')
 const soundAnalysisController = require('./controllers/soundAnalysisController')
+const temhuController = require('./controllers/TemhuController')
 
 let wss
 
@@ -14,6 +16,10 @@ const UDP_PORT = parseInt(process.env.UDP_PORT) || 8888
 const HLS_DIR  = process.env.HLS_DIR || path.resolve(__dirname, '../public/stream')
 const hlsDir   = HLS_DIR
 const CAMERA_TIMEOUT_MS = parseInt(process.env.CAMERA_TIMEOUT_MS) || 5000
+<<<<<<< HEAD
+=======
+
+>>>>>>> kgj
 if (!fs.existsSync(hlsDir)) {
     fs.mkdirSync(hlsDir, { recursive: true })
 } else {
@@ -29,10 +35,6 @@ let lastMessageTime = Date.now()
 
 udpServer.on('message', (msg) => {
     lastMessageTime = Date.now()
-
-    // 영상/오디오 분석하기 위해 분리해서 넣어주기 때문에
-    // 스트리밍은 따로 분리하는 쪽이 좋을 것
-    //streamController.onPacket(msg)
 
     // ffmpeg으로 영상/오디오 분리 (분석용)
     ffmpegProcess.stdin.write(msg)
@@ -100,8 +102,13 @@ const hlsProcess = spawn('ffmpeg', [
     '-c:v', 'copy',                              // 재인코딩 없음
     '-c:a', 'copy',                              // 재인코딩 없음
     '-f', 'hls',
+<<<<<<< HEAD
     '-hls_time', '1',                            // 2초짜리 조각
     '-hls_list_size', '2',                       // 최근 3개 조각만 유지
+=======
+    '-hls_time', '2',                            // 2초짜리 조각
+    '-hls_list_size', '5',                       // 최근 3개 조각만 유지
+>>>>>>> kgj
     '-hls_flags', 'delete_segments+append_list', // 오래된 파일 자동 삭제
     '-hls_allow_cache', '0',                     // 캐시 비활성화
     '-hls_segment_filename', path.join(hlsDir, 'streamingfile%d.ts'),
@@ -110,8 +117,40 @@ const hlsProcess = spawn('ffmpeg', [
     stdio: ['pipe', 'pipe', 'pipe']
 })
 
-function init(wssInstance) {
+// MQTT 연결 (열화상, 온습도 수신)
+const mqttClient = mqtt.connect(`mqtt://${process.env.MQTT_HOST || 'localhost'}:1883`)
+
+mqttClient.on('connect', () => {
+    mqttClient.subscribe('baby/thermal')
+    mqttClient.subscribe('baby/environment')
+    console.log('📡 MQTT 연결됨')
+})
+
+mqttClient.on('message', (topic, message) => {
+    const data = JSON.parse(message.toString())
+    if (topic === 'baby/thermal') {
+        // 열화상 → 영상 분석 트리거
+        // 테스트용으로 적어둔 것 > videoController.onThermal(data) 부분만 남기면 됨
+        const avg = (data.frame.reduce((a, b) => a + b, 0) / data.frame.length).toFixed(2)
+        console.log('[MQTT] 열화상 수신:', data.timestamp, '프레임 길이:', data.frame.length, '평균온도:', avg)
+        videoController.onThermal(data)
+    } else if (topic === 'baby/environment') {
+        // 온습도
+        // 여기도 테스트용
+        console.log('[MQTT] 온습도 수신:', data.temperature, '°C', data.humidity, '%')
+        temhuController.onData(data)
+    }
+})
+
+// ✅ userId를 함께 받아서 soundAnalysisController에 주입
+function init(wssInstance, userId) {
     wss = wssInstance
+<<<<<<< HEAD
+=======
+    soundAnalysisController.setUserId(userId)
+    temhuController.setUserId(userId)
+    videoController.setUserId(userId)
+>>>>>>> kgj
     udpServer.bind(UDP_PORT, () => {
         console.log(`📡 UDP 수신 대기 중 (${UDP_PORT})`)
     })

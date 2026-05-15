@@ -10,9 +10,14 @@ const path = require('path');
 const { connectDB } = require('./src/db');
 const receiver = require('./src/receiver');
 
+const soundAnalysisController = require('./src/controllers/soundAnalysisController')
+const videoController = require('./src/controllers/videoController')
 const temhuController = require('./src/controllers/TemhuController');
 const sleepController = require('./src/controllers/sleepController');
+<<<<<<< HEAD
 const soundAnalysisController = require('./src/controllers/soundAnalysisController');
+=======
+>>>>>>> kgj
 
 const app = express();
 const server = http.createServer(app);
@@ -37,8 +42,11 @@ io.on('connection', (socket) => {
   socket.on('register', (userId) => {
     socket.join(userId);
     console.log(`✅ [${userId}] 소켓 등록됨`);
+<<<<<<< HEAD
     // ✅ Android 연결 시 userId를 soundAnalysisController에 주입
     soundAnalysisController.setUserId(userId);
+=======
+>>>>>>> kgj
   });
 
   socket.on('disconnect', () => {
@@ -121,6 +129,7 @@ app.use('/stream', (req, res, next) => {
   }
   next();
 }, express.static(HLS_DIR));
+<<<<<<< HEAD
 
 // =========================================================
 // CRON JOBS
@@ -139,11 +148,34 @@ cron.schedule(CRON_SLEEP_BATCH, () => {
   console.log('⏰ [배치] 수면 점수 계산');
   // ✅ Android register 이벤트에서 주입된 userId 사용
   sleepController.processHourlyBatch(soundAnalysisController.userId);
+=======
+
+// =========================================================
+// CRON JOBS
+// =========================================================
+
+const BUFFER_SAVE_INTERVAL_MS = parseInt(process.env.BUFFER_SAVE_INTERVAL_MS) || 30000;
+const CRON_SLEEP_BATCH     = process.env.CRON_SLEEP_BATCH     || '*/10 * * * *';
+const CRON_SLEEP_HOURLY    = process.env.CRON_SLEEP_HOURLY    || '0 * * * *';
+const CRON_DAILY_REPORT    = process.env.CRON_DAILY_REPORT    || '0 8 * * *';
+
+// setInterval(() => {
+//   temhuController.saveBufferToDB();
+// }, BUFFER_SAVE_INTERVAL_MS);
+
+cron.schedule(CRON_SLEEP_BATCH, () => {
+  console.log('⏰ [배치] 수면 점수 계산');
+  sleepController.processHourlyBatch(process.env.DEFAULT_USER_ID);
+>>>>>>> kgj
 });
 
 cron.schedule(CRON_SLEEP_HOURLY, () => {
   console.log('⏰ [1시간] 수면 점수 집계');
+<<<<<<< HEAD
   sleepController.processHourlyBatch(soundAnalysisController.userId);
+=======
+  sleepController.processHourlyBatch(process.env.DEFAULT_USER_ID);
+>>>>>>> kgj
 });
 
 cron.schedule(CRON_DAILY_REPORT, () => {
@@ -162,8 +194,23 @@ server.listen(PORT, HOST, async () => {
         await connectDB();
         console.log(`✅ MongoDB 연결 성공`);
 
+<<<<<<< HEAD
         receiver.init(wss);
         console.log(`✅ WebSocket(Receiver) 초기화 성공`);
+=======
+        const DEFAULT_USER_ID = process.env.DEFAULT_USER_ID;
+        if (!DEFAULT_USER_ID) {
+            throw new Error('DEFAULT_USER_ID 환경변수가 설정되지 않았습니다.');
+        }
+
+        //io 때문에 필요할 것 같아서
+        soundAnalysisController.setApp(app)
+        temhuController.setApp(app)
+        videoController.setApp(app)
+
+        receiver.init(wss, DEFAULT_USER_ID);
+        console.log(`✅ WebSocket(Receiver) 초기화 성공 (userId: ${DEFAULT_USER_ID})`);
+>>>>>>> kgj
         axios.post(`${BASE_URL}/api/video/start`).catch(() => {});
         axios.post(`${BASE_URL}/api/sound-analysis/start`).catch(() => {});
 
@@ -172,7 +219,11 @@ server.listen(PORT, HOST, async () => {
 
     } catch (err) {
         console.error("❌ 서버 초기화 중 오류 발생:", err.message);
+<<<<<<< HEAD
         process.exit(1);
+=======
+        process.exit(1); // 쿠버네티스 restartPolicy에 의해 재시작됨
+>>>>>>> kgj
     }
 
     console.log('==============================================');

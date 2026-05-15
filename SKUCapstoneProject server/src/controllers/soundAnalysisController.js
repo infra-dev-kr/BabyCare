@@ -5,6 +5,11 @@
 
 const axios = require('axios');
 const temhuController = require('./TemhuController');
+<<<<<<< HEAD
+=======
+//dB 저장용
+const { SoundAnalysisResult } = require('../models/Soundanalysis');
+>>>>>>> kgj
 
 class SoundAnalysisController {
   constructor() {
@@ -20,6 +25,11 @@ class SoundAnalysisController {
     this.intervalId = null;
     this.app = null;
     this.userId = null; // ✅ receiver.init()에서 주입받음
+<<<<<<< HEAD
+=======
+    this.dbSamples = [];
+    this.currentCryEvent = null; //울음상태
+>>>>>>> kgj
   }
 
   // ✅ server.js에서 app 주입 (io 접근용)
@@ -87,6 +97,17 @@ class SoundAnalysisController {
       if (this.audioBuffer.length > 0) {
         const samples = new Float32Array(this.audioBuffer);
         const db = this.calculateDb(samples);
+        
+        this.dbSamples.push(db);
+
+        if (this.dbSamples.length >= 600) {
+            const avgDb = this.dbSamples.reduce((a, b) => a + b, 0) / 600;
+            this.dbSamples = [];
+            // avgDb를 600번 마다(10분) 평균 내서 DB쪽에 저장하면 수면 점수 잴때 좋을것 같기는 한데
+            // 이렇게 타이머를 따로따로 돌리면 수면 점수 계산이랑 어긋날수도..
+            // 일단은 너무 자주 통계 내는건 안좋아 보여서 n분에 1번 이런식으로 해두긴 했는데
+            // 나중에 수면 점수 관련 타이머랑 같이 돌릴 수 있으면 좋고
+        }
 
         if (db > -40) {
           this.audioFlag = 1;
@@ -100,6 +121,14 @@ class SoundAnalysisController {
         }
 
         if (this.silentCount >= 10 && this.notCryingCount >= 10) {
+          //
+          if (this.currentCryEvent) {
+              // DB 수정 
+              await CryEvent.findByIdAndUpdate(this.currentCryEvent._id, {
+                  cry_end_Time: new Date()
+              });
+              this.currentCryEvent = null;
+          }
           console.log('[SoundAnalysisController] 조용해짐. audioFlag 0으로 변경');
           this.audioFlag = 0;
           this.silentCount = 0;
@@ -159,8 +188,19 @@ class SoundAnalysisController {
           return;
         }
 
+<<<<<<< HEAD
         const io = this.app ? this.app.get('io') : null;
         const cryProbability = response.data.data.cry_probability ?? null;
+=======
+        if (!this.currentCryEvent) {
+            this.currentCryEvent = await SoundAnalysisResult.create({
+                cry_start_Time: new Date()
+            });
+        }
+
+        const io = this.app ? this.app.get('io') : null;
+        const cryProbability = response.data.data.cry_ratio ?? null;
+>>>>>>> kgj
 
         await temhuController.saveCryEvent(this.userId, cryProbability, io);
       }

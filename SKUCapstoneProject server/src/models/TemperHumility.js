@@ -15,11 +15,20 @@ const temperHumilitySchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+<<<<<<< HEAD
   // 수면 점수 (나중에 계산해서 저장)
   sleepScore: {
     type: Number,
     default: null
   },
+=======
+  // 수면 점수 (나중에 계산해서 저장) 
+  // 이거 왜 여기있는지 모르겠어서 일단은 주석
+  // sleepScore: {
+  //   type: Number,
+  //   default: null
+  // },
+>>>>>>> kgj
   timestamp: {
     type: Date,
     default: Date.now
