@@ -42,7 +42,7 @@ public class policy extends AppCompatActivity {
     }
 
     private void fetchPolicies() {
-        String BASE_URL = "http://10.0.2.2:3001/";
+        String BASE_URL = BuildConfig.BASE_URL + "/";
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())

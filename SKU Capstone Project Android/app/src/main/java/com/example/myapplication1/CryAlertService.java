@@ -20,13 +20,15 @@ import java.net.URISyntaxException;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 
+import com.example.myapplication1.BuildConfig;
+
 public class CryAlertService extends Service {
 
     private static final String TAG = "CryAlertService";
     private static final String CHANNEL_ID = "CryAlertChannel";
 
-    // ⚠️ 실제 서버 주소로 변경
-    private static final String SERVER_URL = "http://10.0.2.2:3001";
+    // 환경변수 기반 서버 주소
+    private static final String SERVER_URL = BuildConfig.BASE_URL;
 
     private Socket socket;
     private String userId;

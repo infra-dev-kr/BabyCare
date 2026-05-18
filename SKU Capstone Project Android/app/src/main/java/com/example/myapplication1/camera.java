@@ -38,8 +38,11 @@ public class camera extends AppCompatActivity {
         mediaPlayer = new MediaPlayer(libVLC);
         mediaPlayer.attachViews(playerView, null, false, false);
 
-        Media media = new Media(libVLC, Uri.parse("http://10.0.2.2:3001/stream/streamingfile.m3u8"));
+        String streamUrl = BuildConfig.BASE_URL + "/stream/streamingfile.m3u8";
+
+        Media media = new Media(libVLC, Uri.parse(streamUrl));
         media.setHWDecoderEnabled(true, false);
+
         mediaPlayer.setMedia(media);
         media.release();
         mediaPlayer.play();
@@ -56,10 +59,12 @@ public class camera extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
         }
+
         if (libVLC != null) {
             libVLC.release();
             libVLC = null;

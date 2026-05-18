@@ -12,4 +12,5 @@ COPY . .
 EXPOSE 3001
 EXPOSE 8888/udp
 
+
 CMD ["node", "app.js"]

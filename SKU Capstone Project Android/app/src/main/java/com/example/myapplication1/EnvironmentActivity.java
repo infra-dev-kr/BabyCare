@@ -43,7 +43,7 @@ public class EnvironmentActivity extends AppCompatActivity {
         accessToken = pref.getString("accessToken", "");
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/")
+                .baseUrl(BuildConfig.BASE_URL + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 

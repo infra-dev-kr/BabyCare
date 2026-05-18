@@ -53,7 +53,7 @@ public class Schedule extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.rv_vaccine_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new VaccineAdapter(vaccineList); // ✅ filteredList 제거, vaccineList 직접 사용
+        adapter = new VaccineAdapter(vaccineList);
         recyclerView.setAdapter(adapter);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
@@ -62,7 +62,7 @@ public class Schedule extends AppCompatActivity {
         checkNotificationPermission();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/")
+                .baseUrl("http://192.168.20.10:3001/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -88,10 +88,9 @@ public class Schedule extends AppCompatActivity {
 
         Log.d("USER_CHECK", "저장된 username = " + realUserId);
 
-        // ✅ fallback을 실제 DB username으로 수정
         if (realUserId.isEmpty()) {
             Log.e("USER_CHECK", "SharedPreferences 비어있음 → 테스트 유저 사용");
-            realUserId = "test1"; // ✅ DB 실제 username
+            realUserId = "test1";
             Toast.makeText(this, "테스트 계정으로 실행됨", Toast.LENGTH_SHORT).show();
         }
 
@@ -128,7 +127,7 @@ public class Schedule extends AppCompatActivity {
     }
 
     private void updateUI() {
-        // ✅ 서버에서 이미 필터링해서 내려오므로 중복 필터 제거
+
         adapter.notifyDataSetChanged();
 
         if (!vaccineList.isEmpty()) {
