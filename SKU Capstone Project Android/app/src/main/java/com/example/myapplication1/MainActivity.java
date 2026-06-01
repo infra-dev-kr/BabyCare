@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         TextView tvFindAccount = findViewById(R.id.tv_find_account);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/")
+                .baseUrl(BuildConfig.BASE_URL + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -58,59 +58,122 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void performLogin() {
+
         String username = etId.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            Toast.makeText(MainActivity.this, "아이디와 비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show();
+
+            Toast.makeText(
+                    MainActivity.this,
+                    "아이디와 비밀번호를 입력해주세요.",
+                    Toast.LENGTH_SHORT
+            ).show();
+
             return;
         }
 
-        AuthModels.LoginRequest loginRequest = new AuthModels.LoginRequest(username, password);
+        AuthModels.LoginRequest loginRequest =
+                new AuthModels.LoginRequest(username, password);
 
-        apiService.login(loginRequest).enqueue(new Callback<AuthModels.UserResponse>() {
-            @Override
-            public void onResponse(Call<AuthModels.UserResponse> call, Response<AuthModels.UserResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().ok) {
+        apiService.login(loginRequest)
+                .enqueue(new Callback<AuthModels.UserResponse>() {
 
-                    AuthModels.UserResponse body = response.body();
+                    @Override
+                    public void onResponse(
+                            Call<AuthModels.UserResponse> call,
+                            Response<AuthModels.UserResponse> response
+                    ) {
 
-                    saveUserSession(
-                            username,
-                            body.accessToken,
-                            body.refreshToken
-                    );
+                        if (
+                                response.isSuccessful()
+                                        && response.body() != null
+                                        && response.body().ok
+                        ) {
 
-                    Toast.makeText(MainActivity.this, "로그인 성공!", Toast.LENGTH_SHORT).show();
+                            AuthModels.UserResponse body =
+                                    response.body();
 
-                    Intent intent = new Intent(MainActivity.this, Menuactivity.class);
-                    startActivity(intent);
-                    finish();
+                            saveUserSession(
+                                    username,
+                                    body.accessToken,
+                                    body.refreshToken
+                            );
 
-                } else {
-                    Toast.makeText(MainActivity.this, "로그인 정보가 올바르지 않습니다.", Toast.LENGTH_SHORT).show();
-                }
-            }
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "로그인 성공!",
+                                    Toast.LENGTH_SHORT
+                            ).show();
 
-            @Override
-            public void onFailure(Call<AuthModels.UserResponse> call, Throwable t) {
-                Log.e(TAG, "Login Network Error: " + t.getMessage());
-                Toast.makeText(MainActivity.this, "서버 연결 실패", Toast.LENGTH_SHORT).show();
+                            Intent intent =
+                                    new Intent(
+                                            MainActivity.this,
+                                            Menuactivity.class
+                                    );
 
-                // 테스트용: 서버가 꺼져 있어도 메뉴로 진입 가능하게 처리
-                Intent intent = new Intent(MainActivity.this, Menuactivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+                            startActivity(intent);
+                            finish();
+
+                        } else {
+
+                            Toast.makeText(
+                                    MainActivity.this,
+                                    "로그인 정보가 올바르지 않습니다.",
+                                    Toast.LENGTH_SHORT
+                            ).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            Call<AuthModels.UserResponse> call,
+                            Throwable t
+                    ) {
+
+                        Log.e(
+                                TAG,
+                                "Login Network Error: "
+                                        + t.getMessage()
+                        );
+
+                        Toast.makeText(
+                                MainActivity.this,
+                                "서버 연결 실패",
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        // 테스트용: 서버가 꺼져 있어도 메뉴로 진입 가능하게 처리
+                        Intent intent =
+                                new Intent(
+                                        MainActivity.this,
+                                        Menuactivity.class
+                                );
+
+                        startActivity(intent);
+                        finish();
+                    }
+                });
     }
 
-    private void saveUserSession(String username, String accessToken, String refreshToken) {
-        SharedPreferences pref = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+    private void saveUserSession(
+            String username,
+            String accessToken,
+            String refreshToken
+    ) {
 
-        editor.putString("username", username);      // ✅ "username" 키로 통일
-        editor.putString("userEmail", username);     // ✅ 기존 코드 호환용 유지
+        SharedPreferences pref =
+                getSharedPreferences(
+                        "UserPrefs",
+                        MODE_PRIVATE
+                );
+
+        SharedPreferences.Editor editor =
+                pref.edit();
+
+        editor.putString("username", username);
+        editor.putString("userEmail", username);
+
         editor.putString("accessToken", accessToken);
         editor.putString("refreshToken", refreshToken);
 

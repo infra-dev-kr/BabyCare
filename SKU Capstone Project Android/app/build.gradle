@@ -6,6 +6,10 @@ android {
     namespace 'com.example.myapplication1'
     compileSdk 36
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId "com.example.myapplication1"
         minSdk 24
@@ -14,6 +18,22 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // ==============================
+        // local.properties 직접 읽기
+        // ==============================
+        def localProps = new Properties()
+        def localPropsFile = rootProject.file("local.properties")
+        if (localPropsFile.exists()) {
+            localProps.load(new FileInputStream(localPropsFile))
+        }
+
+        def serverIp = localProps.getProperty("SERVER_IP", "10.0.2.2")
+        def serverPort = localProps.getProperty("SERVER_PORT", "3001")
+
+        buildConfigField "String", "SERVER_IP", "\"${serverIp}\""
+        buildConfigField "String", "SERVER_PORT", "\"${serverPort}\""
+        buildConfigField "String", "BASE_URL", "\"http://${serverIp}:${serverPort}\""
     }
 
     buildTypes {
@@ -22,6 +42,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -35,16 +56,11 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
-
-    // MPAndroidChart 라이브러리 추가 (시계열 그래프용)
-    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0' // 👈 이 줄을 추가해줘!
-
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation 'com.squareup.okhttp3:logging-interceptor:4.10.0'
-// Socket.io
     implementation 'io.socket:socket.io-client:2.1.0'
-    // 스트리밍 오류 >> vlc로 변경
     implementation 'org.videolan.android:libvlc-all:3.6.0'
 }

@@ -33,15 +33,23 @@ public class Menuactivity extends AppCompatActivity {
         ArrayList<String> options = new ArrayList<>();
         options.add("--network-caching=300");
         options.add("--no-audio");
+        options.add("--avcodec-fast");         // SW 디코딩 속도 향상
+        options.add("--avcodec-skiploopfilter=2"); // 화질 감소 cpu 부하 감소
+        options.add("--drop-late-frames"); // 지연 누적 방지
+        options.add("--skip-frames"); // 버벅 거리면 건너 뛰기
 
         libVLC = new LibVLC(this, options);
         mediaPlayer = new MediaPlayer(libVLC);
 
         mediaPlayer.attachViews(mainPreview, null, false, false);
 
+        String streamUrl =
+                BuildConfig.BASE_URL
+                        + "/stream/streamingfile.m3u8";
+
         Media media = new Media(
                 libVLC,
-                Uri.parse("http://10.0.2.2:3001/stream/streamingfile.m3u8")
+                Uri.parse(streamUrl)
         );
 
         media.setHWDecoderEnabled(true, false);
@@ -53,6 +61,7 @@ public class Menuactivity extends AppCompatActivity {
         mediaPlayer.setScale(1);
 
         mainPreview.post(() -> {
+
             int width = mainPreview.getWidth();
             int height = width * 9 / 16;
 
@@ -62,52 +71,112 @@ public class Menuactivity extends AppCompatActivity {
 
         mediaPlayer.play();
 
-        LinearLayout btnEnvironment = findViewById(R.id.btn_environment);
-        LinearLayout btnCamera = findViewById(R.id.btn_camera);
-        LinearLayout btnSchedule = findViewById(R.id.btn_schedule);
-        LinearLayout btnGraph = findViewById(R.id.btn_graph);
-        LinearLayout btnReport = findViewById(R.id.btn_report);
-        LinearLayout btnPolicy = findViewById(R.id.btn_policy);
+        LinearLayout btnEnvironment =
+                findViewById(R.id.btn_environment);
+
+        LinearLayout btnCamera =
+                findViewById(R.id.btn_camera);
+
+        LinearLayout btnSchedule =
+                findViewById(R.id.btn_schedule);
+
+        LinearLayout btnGraph =
+                findViewById(R.id.btn_graph);
+
+        LinearLayout btnReport =
+                findViewById(R.id.btn_report);
+
+        LinearLayout btnPolicy =
+                findViewById(R.id.btn_policy);
 
         ivProfile.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, mypage.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                mypage.class
+                        )
+                )
         );
 
         btnEnvironment.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, EnvironmentActivity.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                EnvironmentActivity.class
+                        )
+                )
         );
 
         btnCamera.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, camera.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                camera.class
+                        )
+                )
         );
 
         btnSchedule.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, Schedule.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                Schedule.class
+                        )
+                )
         );
 
         btnGraph.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, GrapeActivity.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                GrapeActivity.class
+                        )
+                )
         );
 
         btnReport.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, GptReportActivity.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                GptReportActivity.class
+                        )
+                )
         );
 
         btnPolicy.setOnClickListener(v ->
-                startActivity(new Intent(Menuactivity.this, policy.class))
+                startActivity(
+                        new Intent(
+                                Menuactivity.this,
+                                policy.class
+                        )
+                )
         );
 
         // 저장된 로그인 userId 가져오기
-        SharedPreferences prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE);
-        String userId = prefs.getString("username", "");
+        SharedPreferences prefs =
+                getSharedPreferences(
+                        "UserPrefs",
+                        MODE_PRIVATE
+                );
+
+        String userId =
+                prefs.getString("username", "");
 
         // 울음 감지 서비스 시작
-        Intent serviceIntent = new Intent(this, CryAlertService.class);
+        Intent serviceIntent =
+                new Intent(
+                        this,
+                        CryAlertService.class
+                );
+
         serviceIntent.putExtra("userId", userId);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
             startForegroundService(serviceIntent);
+
         } else {
+
             startService(serviceIntent);
         }
     }
@@ -116,7 +185,16 @@ public class Menuactivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mediaPlayer != null) {
+        if (mediaPlayer != null && libVLC != null) {
+            VLCVideoLayout mainPreview = findViewById(R.id.mainPreview);
+            mediaPlayer.detachViews();
+            mediaPlayer.attachViews(mainPreview, null, false, false);
+
+            String streamUrl = BuildConfig.BASE_URL + "/stream/streamingfile.m3u8";
+            Media media = new Media(libVLC, Uri.parse(streamUrl));
+            media.setHWDecoderEnabled(true, false);
+            mediaPlayer.setMedia(media);
+            media.release();
             mediaPlayer.play();
         }
     }
@@ -124,9 +202,8 @@ public class Menuactivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
         if (mediaPlayer != null) {
-            mediaPlayer.pause();
+            mediaPlayer.stop();
         }
     }
 

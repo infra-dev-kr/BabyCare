@@ -46,7 +46,7 @@ public class GrapeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_grape);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.0.2.2:3001/")
+                .baseUrl(BuildConfig.BASE_URL + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
