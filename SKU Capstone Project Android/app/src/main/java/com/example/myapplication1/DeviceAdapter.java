@@ -83,11 +83,14 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.DeviceView
         // 상태 로드
         loadDeviceStatus(holder, device.deviceId, position);
 
-        // 온오프 버튼
+        //온오프 버튼
         if (hasSwitch) {
             holder.btnOnOff.setOnClickListener(v -> {
                 String cmd = "on".equals(switchStates[position]) ? "off" : "on";
                 controlDevice(holder, device.deviceId, position, "switch", cmd, 0);
+                if ("on".equals(cmd)) {
+                    controlDevice(holder, device.deviceId, position, "fanSpeed", "set", 2);
+                }
             });
         }
 
