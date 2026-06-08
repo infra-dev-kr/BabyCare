@@ -189,11 +189,20 @@ public class GrapeActivity extends AppCompatActivity {
 
             scoreEntries.add(new Entry(i, score));
 
-            String timeLabel = data.time;
-            if (timeLabel != null && timeLabel.length() > 16) {
-                timeLabel = timeLabel.substring(11, 16);
+            String timeLabel = "";
+            if (data.time != null) {
+                try {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm", java.util.Locale.getDefault());
+                    sdf.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                    java.util.Date date = sdf.parse(data.time.length() > 16 ? data.time.substring(0, 16) : data.time);
+                    java.text.SimpleDateFormat outSdf = new java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+                    outSdf.setTimeZone(java.util.TimeZone.getTimeZone("Asia/Seoul"));
+                    timeLabel = outSdf.format(date);
+                } catch (Exception e) {
+                    timeLabel = "";
+                }
             }
-            labels.add(timeLabel != null ? timeLabel : "");
+            labels.add(timeLabel);
         }
 
         configureChart(scoreEntries, labels);
