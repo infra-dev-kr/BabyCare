@@ -138,7 +138,7 @@ public class GrapeActivity extends AppCompatActivity {
                             );
 
                             if (data.noise != null) {
-                                tvNoise.setText(String.format("%.0f dB", data.noise));
+                                tvNoise.setText(String.format("%.0f dB", data.noise+80));
                             } else {
                                 tvNoise.setText("-- dB");
                             }
