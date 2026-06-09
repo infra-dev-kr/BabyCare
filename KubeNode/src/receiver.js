@@ -161,9 +161,24 @@ udpServer.on('error', (err) => {
 })
 
 // 카메라 끊김 감지: 타임아웃 지나면 HLS 파일 삭제
+// 객체인식 음성분석도 초기화
 setInterval(() => {
     if (Date.now() - lastMessageTime > CAMERA_TIMEOUT_MS) {
         clearHlsDir()
+        soundAnalysisController.analysisResults = []
+        soundAnalysisController.analysisHistory = []
+        soundAnalysisController.audioBuffer = []
+        soundAnalysisController.audioFlag = 0
+        soundAnalysisController.silentCount = 0
+        soundAnalysisController.notCryingCount = 0
+        soundAnalysisController.isAnalyzing = false
+        soundAnalysisController.dbSamples = []
+        soundAnalysisController.currentCryEvent = null
+        videoController.currentFrame = null
+        videoController.frameBuffer = []
+        videoController.isAnalyzing = false
+        videoController.latestThermal = null
+        videoController.analysisResults = []
     }
 }, CAMERA_TIMEOUT_MS)
 

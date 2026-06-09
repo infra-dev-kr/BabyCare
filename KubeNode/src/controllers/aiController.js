@@ -99,7 +99,7 @@ exports.generateDailyReport = async () => {
             avgNoise: 50.0,
             avgScore: 66.0,
             cryingCount: 10,
-            dataCount: 72
+            dataCount: 720
         }; // 임시 데이터
 
         const reportText = await generateAiReport(data);
