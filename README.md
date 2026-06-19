@@ -44,35 +44,35 @@ AI(Artificial Intelligence)와 IoT(Internet of Things)를 결합하여 신생아
 
 # 🧠 기술 스택
 
-| 영역                 | 기술                                                                            |
+| 영역 | 기술 |
 | ------------------ | ----------------------------------------------------------------------------- |
-| **AI / 분석**        | YOLO · MediaPipe · Wav2Vec · ONNX Runtime                                     |
-| **Backend**        | Node.js · Flask · REST API · Scheduler                                        |
-| **Database**       | MongoDB                                                                       |
-| **Mobile**         | Android Studio · Java · Dashboard UI                                          |
+| **AI / 분석** | YOLO · MediaPipe · Wav2Vec · ONNX Runtime |
+| **Backend** | Node.js · Flask · REST API · Scheduler |
+| **Database** | MongoDB |
+| **Mobile** | Android Studio · Java · Dashboard UI |
 | **IoT / Hardware** | Raspberry Pi · Camera Module · Thermal Camera · Temperature & Humidity Sensor |
-| **Smart Home**     | SmartThings API                                                               |
-| **DevOps / Infra** | Docker · DockerHub · Kubernetes · Nginx · AWS                                 |
-| **Collaboration**  | Git · GitHub                                                                  |
+| **Smart Home** | SmartThings API |
+| **DevOps / Infra** | Docker · DockerHub · Kubernetes · Nginx · AWS |
+| **Collaboration** | Git · GitHub |
 
 ---
 
 # 🚀 주요 기능
 
-| 기능              | 설명                   |
+| 기능 | 설명 |
 | --------------- | -------------------- |
-| 🌡️ 온·습도 감지     | 실시간 환경 측정 및 이상 환경 감지 |
+| 🌡️ 온·습도 감지 | 실시간 환경 측정 및 이상 환경 감지 |
 | 📷 베이비캠 및 체온 감지 | 얼굴 검출 및 열화상 기반 체온 분석 |
-| 🎤 울음 감지        | Wav2Vec 기반 울음 여부 분석  |
-| 📊 AI 리포트 생성    | 수면 및 환경 변화 데이터 시각화   |
-| 🏠 자동 환경 제어     | SmartThings 기반 자동 제어 |
-| 🔔 사용자 알림       | 이상 상태 발생 시 실시간 알림    |
-| 🔐 사용자 인증       | 회원가입 및 로그인           |
-| 📱 실시간 모니터링     | 모바일 Dashboard 제공     |
-| 📅 육아 일정 관리     | 예방접종 및 검진 일정 알림      |
-| 📈 로그 및 통계      | 이상 이벤트 저장 및 통계       |
-| ♻️ 오토힐링         | 서버 장애 자동 복구          |
-| 📡 관측가능성        | 시스템 모니터링 및 상태 관리     |
+| 🎤 울음 감지 | Wav2Vec 기반 울음 여부 분석 |
+| 📊 AI 리포트 생성 | 수면 및 환경 변화 데이터 시각화 |
+| 🏠 자동 환경 제어 | SmartThings 기반 자동 제어 |
+| 🔔 사용자 알림 | 이상 상태 발생 시 실시간 알림 |
+| 🔐 사용자 인증 | 회원가입 및 로그인 |
+| 📱 실시간 모니터링 | 모바일 Dashboard 제공 |
+| 📅 육아 일정 관리 | 예방접종 및 검진 일정 알림 |
+| 📈 로그 및 통계 | 이상 이벤트 저장 및 통계 |
+| ♻️ 오토힐링 | 서버 장애 자동 복구 |
+| 📡 관측가능성 | 시스템 모니터링 및 상태 관리 |
 
 ---
 
@@ -183,14 +183,8 @@ AI(Artificial Intelligence)와 IoT(Internet of Things)를 결합하여 신생아
 
 # 🏗 시스템 아키텍처
 
-> 아래 위치에 아키텍처 이미지 추가
-
-```md
-/assets/system_architecture.png
-```
-
 <p align="center">
-  <img src="./assets/system_architecture.png" width="95%">
+  <img src="assets/system_architecture.png" width="95%" alt="System Architecture">
 </p>
 
 ---
@@ -201,11 +195,3 @@ AI(Artificial Intelligence)와 IoT(Internet of Things)를 결합하여 신생아
 * 보호자 육아 부담 감소
 * 스마트홈 기반 자동 케어 환경 구축
 * AI 기반 예방형 육아 서비스 제공
-
----
-
-# 📷 결과 화면
-
-> 추후 앱 화면 및 시연 이미지 추가 예정
-
----
